@@ -1,0 +1,9 @@
+[
+    {
+        "model": "register.employee",
+        "pk": 1,
+        "fields": {
+            "name": "Luis Garcia"
+        }
+    }
+]
