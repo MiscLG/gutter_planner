@@ -1,4 +1,5 @@
 import graphene
+from graphene.types.scalars import String
 from graphene_django.types import DjangoObjectType, ObjectType
 from register.models import Client, Employee
 
@@ -18,6 +19,9 @@ class Query(ObjectType):
     clients = graphene.List(ClientType)
     employee = graphene.Field(EmployeeType, id=graphene.Int())
     employees = graphene.List(EmployeeType)
+
+    def resolve_auth(self, info, **kwargs):
+        return
 
     def resolve_client(self, info, **kwargs):
         id = kwargs.get('id')

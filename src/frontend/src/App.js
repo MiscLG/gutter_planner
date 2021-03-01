@@ -1,9 +1,13 @@
 import logo from './logo.svg';
 import './App.css';
+import AdminPage from './AdminPage'
+import {NavigationBar as Nav} from './NavigationBar'
+import {BrowserRouter as Router} from "react-router-dom";
 
-function App() {
+const App = () => {
   return (
     <div className="App">
+      <Nav/>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>

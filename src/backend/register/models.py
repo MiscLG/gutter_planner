@@ -3,6 +3,14 @@ from django.db import models
 # Create your models here.
 
 
+class User(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+
+    class Meta:
+        abstract = True
+
+
 class Address(models.Model):
     # use address module form elsewhere
     line1 = models.CharField(max_length=100)
@@ -17,9 +25,10 @@ class Address(models.Model):
         ordering = ('street',)
 
 
-class Client(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
+class Client(User):
+    # uses superclass
+    # name = models.CharField(max_length=100)
+    # email = models.EmailField()
     # Change model type
     address = models.ManyToManyField(Address)
 
@@ -30,9 +39,8 @@ class Client(models.Model):
         ordering = ('name',)
 
 
-class Employee(models.Model):
-    name = models.CharField(max_length=100)
-
+class Employee(User):
+    # name = models.CharField(max_length=100)
     def _str_(self):
         return self.name
 
