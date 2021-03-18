@@ -8,9 +8,9 @@ from graphql_auth import mutations
 import graphql_social_auth
 
 
-class UserType(DjangoObjectType):
-    class Meta:
-        model = User
+# class UserType(DjangoObjectType):
+#     class Meta:
+#         model = User
 
 
 class AddressType(DjangoObjectType):
@@ -27,11 +27,11 @@ class AddressType(DjangoObjectType):
 
 
 class Query(UserQuery, MeQuery, ObjectType):
-    users = graphene.List(UserType)
+    # users = graphene.List(UserType)
     addresses = graphene.List(AddressType)
 
-    def resolve_users(self, info, **kwargs):
-        return User.nodes.all()
+    # def resolve_users(self, info, **kwargs):
+    #     return User.nodes.all()
 
     def resolve_addresses(self, info, **kwargs):
         return Address.nodes.all()
