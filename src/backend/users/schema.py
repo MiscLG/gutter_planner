@@ -2,20 +2,11 @@ import graphene
 from graphene.types.scalars import String
 from graphene_django.types import DjangoObjectType, ObjectType
 # from users.models import Client, Employee
-from users.models import User, Address
 from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations
 import graphql_social_auth
 
 
-class UserType(DjangoObjectType):
-    class Meta:
-        model = User
-
-
-class AddressType(DjangoObjectType):
-    class Meta:
-        model = Address
 # class ClientType(DjangoObjectType):
 #     class Meta:
 #         model = Client
@@ -27,14 +18,7 @@ class AddressType(DjangoObjectType):
 
 
 class Query(UserQuery, MeQuery, ObjectType):
-    users = graphene.List(UserType)
-    addresses = graphene.List(AddressType)
-
-    def resolve_users(self, info, **kwargs):
-        return User.nodes.all()
-
-    def resolve_addresses(self, info, **kwargs):
-        return Address.nodes.all()
+    pass
     # client = graphene.Field(ClientType, id=graphene.Int())
     # clients = graphene.List(ClientType)
     # employee = graphene.Field(EmployeeType, id=graphene.Int())
