@@ -1,0 +1,32 @@
+.MuiTabs-root {
+  /* align-self: flex-start;
+  width: 20vw; */
+}
+.MuiTabs-flexContainerVertical {
+  /* position: relative; */
+  display: flex;
+  justify-content: space-evenly;
+}
+.MuiAppBar-root > div {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+.MuiAppBar-root {
+  padding: 10px;
+}
+.navigation {
+  text-decoration: none;
+  color: inherit;
+}
+#content {
+  width: 100vw;
+  display: flex;
+  justify-content: flex-end;
+  align-content: flex-end;
+  align-items: stretch;
+}
+#page {
+  justify-self: flex-start;
+  min-width: 75vw;
+}

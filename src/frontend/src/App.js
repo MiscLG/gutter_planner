@@ -1,28 +1,33 @@
 import logo from './logo.svg';
+import React, {useState} from "react";
 import './App.css';
 import AdminPage from './AdminPage'
+import LoginPage from './LoginPage'
+import Estimate from './Estimate'
+import Home from './Home'
 import {NavigationBar as Nav} from './NavigationBar'
-import {BrowserRouter as Router} from "react-router-dom";
+import {BrowserRouter as Router,Redirect,Route} from "react-router-dom";
 
 const App = () => {
+  const [loggedIn, setLoginStatus] = useState(true)
+  const [user,setUser] = useState({})
   return (
-    <div className="App">
-      <Nav/>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Nav> 
+        <Route path="/">
+          <Home />
+        </Route>
+        <Route path="/admin">
+          { loggedIn ? <AdminPage />: <Redirect to="/login"/>}
+        </Route>
+        <Route path="/estimate">
+          {loggedIn? <Estimate/>: <Redirect to="/login"/>}
+        </Route>
+        <Route path="/login">
+         {loggedIn? <Redirect to="/"/>:<LoginPage/>}
+        </Route>
+      </Nav>
+    </Router>
   );
 }
 

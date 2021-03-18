@@ -1,21 +1,21 @@
 import React, {useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
-import {getClients} from "./API"
+import {getUsers} from "./API"
 
 
 function AdminPage(){
     const [error, setError] = useState(null);
-    const [clientQuery, setCQuery] = useState([]);
+    const [userQuery, setUQuery] = useState([]);
     let history = useHistory();
 
     //Queries Client API
-    const queryClient = async () => {
+    const queryUser = async () => {
         try {
-            let result = await getClients();
+            let result = await getUsers();
             // result.data.map((value, index)=> console.log(value,index))
             // console.log(result.data.clients)
             console.log(result)
-            setCQuery(result.data.clients)
+            setUQuery(result.data.users.edges)
         } catch (error) {
             console.log(error)
             setError("Something went wrong.");
@@ -23,11 +23,11 @@ function AdminPage(){
     };
 
     //fills page with api results
-    const clientList = (
+    const userList = (
         <div >
             <h3> Client List</h3>
             <ul> 
-                {clientQuery.map(client=> <li key={client.id}>{client.name}</li>)}
+                {userQuery.map(user=> <li key={user.node.id}>{user.node.username}</li>)}
             </ul>
         </div>
     )
@@ -35,7 +35,7 @@ function AdminPage(){
     //calls the api on load
     useEffect(()=>{
         // history.push("/admin");
-        queryClient();
+        queryUser();
     },[]);
 
     return (
@@ -44,7 +44,7 @@ function AdminPage(){
             <h1> Admin Page </h1>
             <div>
                 {
-                    error ? (<div className="error">{error}</div>):  (clientList)
+                    error ? (<div className="error">{error}</div>):  (userList)
                 }
             </div>
             
