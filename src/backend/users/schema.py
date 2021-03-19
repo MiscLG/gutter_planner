@@ -1,40 +1,66 @@
 import graphene
-from graphene.types.scalars import String
-from graphene_django.types import DjangoObjectType, ObjectType
-# from users.models import Client, Employee
-from users.models import User, Address
+# from graphene.types.scalars import String
+from six import add_metaclass
+from users.models import *
+from graphene_django.types import ObjectType
 from graphql_auth.schema import UserQuery, MeQuery
-from graphql_auth import mutations
+from graphql_auth import mutations, exceptions
 import graphql_social_auth
+from neomodel import db
+
+from django.utils.translation import gettext as _
 
 
-# class UserType(DjangoObjectType):
-#     class Meta:
-#         model = User
+class AddressFields(object):
+    # TODO: parse StructuredNodes into graphene ObjectTypes
+    addressLine1 = graphene.String()
+    addressLine2 = graphene.String()
+    city = graphene.String()
+    zipCode = graphene.String()
+    isGated = graphene.Boolean()
 
 
-class AddressType(DjangoObjectType):
-    class Meta:
-        model = Address
-# class ClientType(DjangoObjectType):
-#     class Meta:
-#         model = Client
+class AddressType(graphene.ObjectType, AddressFields):
+    # TODO: Add resolution to associated users
+    @db.transaction
+    def create(self):
+        print("HELLO", self.__dict__)
+        Address(**self.__dict__).save()
 
 
-# class EmployeeType(DjangoObjectType):
-#     class Meta:
-#         model = Employee
+class AddressInput(graphene.InputObjectType, AddressFields):
+    # addressLine1 = graphene.String(required=True)
+    # zipCode = graphene.String(required=True)
+    pass
+
+
+class CreateAddress(graphene.Mutation):
+    class Arguments:
+        a_data = AddressInput(required=True)
+
+    ok = graphene.Boolean()
+    address = graphene.Field(AddressType)
+
+    def mutate(root, info, a_data=None):
+        address = AddressType(
+            addressLine1=a_data.addressLine1,
+            zipCode=a_data.zipCode
+        )
+        address.create()
+        ok = True
+        return CreateAddress(address=address, ok=ok)
 
 
 class Query(UserQuery, MeQuery, ObjectType):
-    # users = graphene.List(UserType)
     addresses = graphene.List(AddressType)
 
-    # def resolve_users(self, info, **kwargs):
-    #     return User.nodes.all()
-
     def resolve_addresses(self, info, **kwargs):
-        return Address.nodes.all()
+        results, columns = db.cypher_query(
+            "MATCH (a:Address) RETURN a LIMIT 5")
+        print(results)
+        items = [Address.inflate(row[0]) for row in results]
+        print(items[0])
+        return items
     # client = graphene.Field(ClientType, id=graphene.Int())
     # clients = graphene.List(ClientType)
     # employee = graphene.Field(EmployeeType, id=graphene.Int())
@@ -145,8 +171,41 @@ class Query(UserQuery, MeQuery, ObjectType):
     #         return UpdateEmployee(ok=ok, employee=None)
 
 
+class DBRegistrationError(exceptions.GraphQLAuthError):
+    default_message = _("There was an error adding the user to our database.")
+
+
+class customRegister(mutations.Register):
+    # TODO: modify social auth for extra redundancy checks and DB management
+    @classmethod
+    def resolve_mutation(cls, root, info, **kwargs):
+        r_val = super().resolve_mutation(root, info, **kwargs)
+        # print(r_val.__dict__)
+        # print(root)
+        # print(info)
+        # print(kwargs)
+        # print(r_val.success)
+        if r_val.success:
+            usr = GPUser.objects.get(username=kwargs.get('username'))
+            try:
+                User(
+                    username=kwargs.get('username'),
+                    email=kwargs.get('email'),
+                    user=usr
+                ).save()
+            except:
+                usr.delete()
+                r_val = cls(success=False,
+                            errors={'DatabaseError': "Could not add user to database"})
+                raise DBRegistrationError
+
+        return r_val
+
+
 class AuthMutation(graphene.ObjectType):
-    register = mutations.Register.Field()
+    # TODO: Make a mutation to make neo4j User object
+    register = customRegister.Field()
+    # register = mutations.Register.Field()
     verify_account = mutations.VerifyAccount.Field()
     resend_activation_email = mutations.ResendActivationEmail.Field()
     send_password_reset_email = mutations.SendPasswordResetEmail.Field()
@@ -174,6 +233,7 @@ class Mutation(AuthMutation, graphene.ObjectType):
     # create_employee = CreateEmployee.Field()
     # update_employee = UpdateEmployee.Field()
     social_auth = graphql_social_auth.SocialAuth.Field()
+    create_address = CreateAddress.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

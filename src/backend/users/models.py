@@ -29,8 +29,8 @@ class User(StructuredNode):
 
 class Address(StructuredNode):
     # use address module form elsewhere
-    addressline1 = StringProperty(required=True, unique=True)
-    addressline2 = StringProperty()
+    addressLine1 = StringProperty(required=True, unique=True)
+    addressLine2 = StringProperty()
     city = StringProperty()
     zipCode = StringProperty(Required=True)
     isGated = BooleanProperty()
