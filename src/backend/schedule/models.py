@@ -14,26 +14,26 @@ class Job(StructuredNode):
     jid = UniqueIdProperty()
     depositPaid = BooleanProperty(required=True)
     dateStarted = DateTimeProperty()
-    date_finished = DateTimeProperty()
+    dateFinished = DateTimeProperty()
 
-    client = RelationshipFrom('users.User', 'ORDERS')
-    roofers = RelationshipTo('users.User', 'ASSIGNED_TO')
-    address = Relationship('users.Adress', 'DESIGNATED')
+    client = RelationshipFrom('users.models.User', 'ORDERS')
+    roofers = RelationshipTo('users.models.User', 'ASSIGNED_TO')
+    address = Relationship('users.models.Address', 'DESIGNATED')
 
 
 # class EstimateRel(StructuredRel):
 #     creationDate = DateTimeProperty(default_now=True)
 #     client_made = BooleanProperty(default=True)
 
-
+# Color Choices may become lists or enums
 class Estimate(StructuredNode):
     eid = UniqueIdProperty()
     roofType = StringProperty(required=True)
     ftGutter = IntegerProperty(required=True)
-    gutterColor = StringProperty()  # can be a relationship maybe
+    gutterColor = IntegerProperty()  # can be a relationship maybe
     gutterRate = FloatProperty(default=G_RATE)
     qtyDownspout = IntegerProperty(required=True)
-    downspoutColor = StringProperty()  # can be a relationship maybe
+    downspoutColor = IntegerProperty()  # can be a relationship maybe
     downspoutRate = FloatProperty(default=DS_RATE)
     roofInclination = StringProperty(required=True,
                                      choices={"low": '<15', "conventional": "15-30", "steep": ">30"})
@@ -45,5 +45,5 @@ class Estimate(StructuredNode):
     client_made = BooleanProperty(default=True)
 
     estimator = RelationshipFrom(
-        'user.User', 'CREATED')
+        'users.models.User', 'CREATED')
     job = RelationshipFrom(Job, 'ESTIMATED_AS')
