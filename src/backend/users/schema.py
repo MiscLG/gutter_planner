@@ -1,8 +1,10 @@
 import graphene
+
 # from graphene.types.scalars import String
 from six import add_metaclass
 from users.models import *
 from graphene_django.types import ObjectType
+
 from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations, exceptions
 import graphql_social_auth
@@ -25,6 +27,7 @@ class AddressType(graphene.ObjectType, AddressFields):
     pass
 
 
+
 CreateAddress = makeMutation(AddressFields, AddressType, Address)
 
 
@@ -33,6 +36,7 @@ class Query(UserQuery, MeQuery, ObjectType):
 
     def resolve_addresses(self, info, **kwargs):
         return getNodes(Address)
+
     # client = graphene.Field(ClientType, id=graphene.Int())
     # clients = graphene.List(ClientType)
     # employee = graphene.Field(EmployeeType, id=graphene.Int())
