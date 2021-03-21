@@ -7,7 +7,7 @@ from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations, exceptions
 import graphql_social_auth
 from neomodel import db
-
+from common.utils import makeMutation, getNodes
 from django.utils.translation import gettext as _
 
 
@@ -22,45 +22,17 @@ class AddressFields(object):
 
 class AddressType(graphene.ObjectType, AddressFields):
     # TODO: Add resolution to associated users
-    @db.transaction
-    def create(self):
-        print("HELLO", self.__dict__)
-        Address(**self.__dict__).save()
-
-
-class AddressInput(graphene.InputObjectType, AddressFields):
-    # addressLine1 = graphene.String(required=True)
-    # zipCode = graphene.String(required=True)
     pass
 
 
-class CreateAddress(graphene.Mutation):
-    class Arguments:
-        a_data = AddressInput(required=True)
-
-    ok = graphene.Boolean()
-    address = graphene.Field(AddressType)
-
-    def mutate(root, info, a_data=None):
-        address = AddressType(
-            addressLine1=a_data.addressLine1,
-            zipCode=a_data.zipCode
-        )
-        address.create()
-        ok = True
-        return CreateAddress(address=address, ok=ok)
+CreateAddress = makeMutation(AddressFields, AddressType, Address)
 
 
 class Query(UserQuery, MeQuery, ObjectType):
     addresses = graphene.List(AddressType)
 
     def resolve_addresses(self, info, **kwargs):
-        results, columns = db.cypher_query(
-            "MATCH (a:Address) RETURN a LIMIT 5")
-        print(results)
-        items = [Address.inflate(row[0]) for row in results]
-        print(items[0])
-        return items
+        return getNodes(Address)
     # client = graphene.Field(ClientType, id=graphene.Int())
     # clients = graphene.List(ClientType)
     # employee = graphene.Field(EmployeeType, id=graphene.Int())
@@ -92,83 +64,6 @@ class Query(UserQuery, MeQuery, ObjectType):
 
     # def resolve_employees(self, info, **kwargs):
     #     return Employee.objects.all()
-
-    # class ClientInput(graphene.InputObjectType):
-    #     # TODO: Fix Input to reflect finalized client model
-    #     id = graphene.ID()
-    #     # name = graphene.String()
-    #     # email = graphene.String()
-
-    # class EmployeeInput(graphene.InputObjectType):
-    #     # TODO: Fix Input to reflect finalized Employee model
-    #     id = graphene.ID()
-    #     name = graphene.String()
-
-    # class CreateClient(graphene.Mutation):
-    #     class Arguments:
-    #         input = ClientInput(required=True)
-
-    #     ok = graphene.Boolean()
-    #     client = graphene.Field(ClientType)
-
-    #     @staticmethod
-    #     def mutate(root, info, input=None):
-    #         ok = True
-    #         client_instance = Client(name=input.name)
-    #         client_instance.save()
-    #         return CreateClient(ok=ok, client=client_instance)
-
-    # class UpdateClient(graphene.Mutation):
-    #     class Arguments:
-    #         id = graphene.Int(required=True)
-    #         input = ClientInput(required=True)
-
-    #     ok = graphene.Boolean()
-    #     client = graphene.Field(ClientType)
-
-    #     @staticmethod
-    #     def mutate(root, info, id, input=None):
-    #         ok = False
-    #         client_instance = Client.objects.get(pk=id)
-    #         if client_instance:
-    #             ok = True
-    #             client_instance.name = input.name
-    #             client_instance.save()
-    #             return UpdateClient(ok=ok, client=client_instance)
-    #         return UpdateClient(ok=ok, client=None)
-
-    # class CreateEmployee(graphene.Mutation):
-    #     class Arguments:
-    #         input = EmployeeInput(required=True)
-
-    #     ok = graphene.Boolean()
-    #     client = graphene.Field(ClientType)
-
-    #     @staticmethod
-    #     def mutate(root, info, input=None):
-    #         ok = True
-    #         employee_instance = Employee(name=input.name)
-    #         employee_instance.save()
-    #         return CreateEmployee(ok=ok, employee=employee_instance)
-
-    # class UpdateEmployee(graphene.Mutation):
-    #     class Arguments:
-    #         id = graphene.Int(required=True)
-    #         input = EmployeeInput(required=True)
-
-    #     ok = graphene.Boolean()
-    #     employee = graphene.Field(EmployeeType)
-
-    #     @staticmethod
-    #     def mutate(root, info, id, input=None):
-    #         ok = False
-    #         employee_instance = Employee.objects.get(pk=id)
-    #         if employee_instance:
-    #             ok = True
-    #             employee_instance.name = input.name
-    #             employee_instance.save()
-    #             return UpdateEmployee(ok=ok, employee=employee_instance)
-    #         return UpdateEmployee(ok=ok, employee=None)
 
 
 class DBRegistrationError(exceptions.GraphQLAuthError):
@@ -228,12 +123,86 @@ class AuthMutation(graphene.ObjectType):
 
 
 class Mutation(AuthMutation, graphene.ObjectType):
-    # create_client = CreateClient.Field()
-    # update_client = UpdateClient.Field()
-    # create_employee = CreateEmployee.Field()
-    # update_employee = UpdateEmployee.Field()
     social_auth = graphql_social_auth.SocialAuth.Field()
     create_address = CreateAddress.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
+
+
+# class ClientInput(graphene.InputObjectType):
+#     # TODO: Fix Input to reflect finalized client model
+#     id = graphene.ID()
+#     # name = graphene.String()
+#     # email = graphene.String()
+
+# class EmployeeInput(graphene.InputObjectType):
+#     # TODO: Fix Input to reflect finalized Employee model
+#     id = graphene.ID()
+#     name = graphene.String()
+
+# class CreateClient(graphene.Mutation):
+#     class Arguments:
+#         input = ClientInput(required=True)
+
+#     ok = graphene.Boolean()
+#     client = graphene.Field(ClientType)
+
+#     @staticmethod
+#     def mutate(root, info, input=None):
+#         ok = True
+#         client_instance = Client(name=input.name)
+#         client_instance.save()
+#         return CreateClient(ok=ok, client=client_instance)
+
+# class UpdateClient(graphene.Mutation):
+#     class Arguments:
+#         id = graphene.Int(required=True)
+#         input = ClientInput(required=True)
+
+#     ok = graphene.Boolean()
+#     client = graphene.Field(ClientType)
+
+#     @staticmethod
+#     def mutate(root, info, id, input=None):
+#         ok = False
+#         client_instance = Client.objects.get(pk=id)
+#         if client_instance:
+#             ok = True
+#             client_instance.name = input.name
+#             client_instance.save()
+#             return UpdateClient(ok=ok, client=client_instance)
+#         return UpdateClient(ok=ok, client=None)
+
+# class CreateEmployee(graphene.Mutation):
+#     class Arguments:
+#         input = EmployeeInput(required=True)
+
+#     ok = graphene.Boolean()
+#     client = graphene.Field(ClientType)
+
+#     @staticmethod
+#     def mutate(root, info, input=None):
+#         ok = True
+#         employee_instance = Employee(name=input.name)
+#         employee_instance.save()
+#         return CreateEmployee(ok=ok, employee=employee_instance)
+
+# class UpdateEmployee(graphene.Mutation):
+#     class Arguments:
+#         id = graphene.Int(required=True)
+#         input = EmployeeInput(required=True)
+
+#     ok = graphene.Boolean()
+#     employee = graphene.Field(EmployeeType)
+
+#     @staticmethod
+#     def mutate(root, info, id, input=None):
+#         ok = False
+#         employee_instance = Employee.objects.get(pk=id)
+#         if employee_instance:
+#             ok = True
+#             employee_instance.name = input.name
+#             employee_instance.save()
+#             return UpdateEmployee(ok=ok, employee=employee_instance)
+#         return UpdateEmployee(ok=ok, employee=None)

@@ -16,9 +16,9 @@ class Job(StructuredNode):
     dateStarted = DateTimeProperty()
     dateFinished = DateTimeProperty()
 
-    client = RelationshipFrom('users.User', 'ORDERS')
-    roofers = RelationshipTo('users.User', 'ASSIGNED_TO')
-    address = Relationship('users.Adress', 'DESIGNATED')
+    client = RelationshipFrom('users.models.User', 'ORDERS')
+    roofers = RelationshipTo('users.models.User', 'ASSIGNED_TO')
+    address = Relationship('users.models.Address', 'DESIGNATED')
 
 
 # class EstimateRel(StructuredRel):
