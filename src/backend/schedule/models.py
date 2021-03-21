@@ -14,7 +14,7 @@ class Job(StructuredNode):
     jid = UniqueIdProperty()
     depositPaid = BooleanProperty(required=True)
     dateStarted = DateTimeProperty()
-    date_finished = DateTimeProperty()
+    dateFinished = DateTimeProperty()
 
     client = RelationshipFrom('users.User', 'ORDERS')
     roofers = RelationshipTo('users.User', 'ASSIGNED_TO')

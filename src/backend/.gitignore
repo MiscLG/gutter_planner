@@ -5,7 +5,8 @@ ngo #
 __pycache__
 db.sqlite3
 media
-
+# Mock Data
+data/
 # Backup files # 
 *.bak 
 
