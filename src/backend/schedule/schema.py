@@ -1,17 +1,25 @@
 import graphene
 from graphene.types.argument import Argument
-from users.schema import AddressType
 from graphene_django.types import DjangoObjectType, ObjectType
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import makeMutation, getNodes
+from common.utils import modelSchema, getNodes
 
 
 class InclinationMeasure(graphene.Enum):
     L = "low"
     C = "conventional"
     S = "steep"
+
+
+class AddressFields(object):
+    # TODO: parse StructuredNodes into graphene ObjectTypes
+    addressLine1 = graphene.String()
+    addressLine2 = graphene.String()
+    city = graphene.String()
+    zipCode = graphene.String()
+    isGated = graphene.Boolean()
 
 
 class JobFields(object):
@@ -34,19 +42,49 @@ class EstimateFields(object):
     notes = graphene.String()
 
 
+class AddressType(graphene.ObjectType, AddressFields):
+    # TODO: Add resolution to associated users
+    pass
+
+
+AddressInput, CreateAddress = modelSchema(Address, AddressFields, AddressType)
+
+
 class JobType(graphene.ObjectType, JobFields):
     jid = graphene.String()
     # TODO: add resolutions for clients, workers and address
 
 
+JobInput, CreateJob = modelSchema(Job, JobFields, JobType)
+
+
 class EstimateType(graphene.ObjectType, EstimateFields):
     eid = graphene.String()
+    address = graphene.Field(AddressType)
+    job = graphene.Field(JobType)
     # TODO: add resolution for estimators, job, address and price
 
 
+EstimateInput, CreateEstimate = modelSchema(
+    Estimate, EstimateFields, EstimateType,
+    in_vars={
+        "address": AddressInput(),
+        "job": JobInput(),
+    },
+    rel_map={
+        "address": Address,
+        "job": Job,
+    }
+)
+
+
 class Query(ObjectType):
+    addresses = graphene.List(AddressType)
     estimates = graphene.List(EstimateType)
     jobs = graphene.List(JobType)
+
+    def resolve_addresses(self, info, **kwargs):
+        return getNodes(Address)
 
     def resolve_estimates(self, info, **kwargs):
         return getNodes(Estimate)
@@ -56,9 +94,9 @@ class Query(ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    create_estimate = makeMutation(
-        EstimateFields, EstimateType, Estimate).Field()
-    create_job = makeMutation(JobFields, JobType, Job).Field()
+    create_address = CreateAddress.Field()
+    create_estimate = CreateEstimate.Field()
+    create_job = CreateJob.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

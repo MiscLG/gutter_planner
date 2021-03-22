@@ -25,13 +25,3 @@ class User(StructuredNode):
     firstName = StringProperty(max_length=MAX_NAME_LENGTH)
     lastName = StringProperty(max_length=MAX_NAME_LENGTH)
     user = models.OneToOneField(GPUser, on_delete=models.CASCADE)
-
-
-class Address(StructuredNode):
-    # use address module form elsewhere
-    addressLine1 = StringProperty(required=True, unique_index=True)
-    addressLine2 = StringProperty()
-    city = StringProperty()
-    zipCode = StringProperty(Required=True)
-    isGated = BooleanProperty()
-    user = Relationship('User', 'ASSOCIATED_WITH')

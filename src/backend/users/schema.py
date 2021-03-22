@@ -1,73 +1,18 @@
 import graphene
-
-# from graphene.types.scalars import String
 from six import add_metaclass
-from users.models import *
 from graphene_django.types import ObjectType
-
 from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations, exceptions
 import graphql_social_auth
-from neomodel import db
-from common.utils import makeMutation, getNodes
 from django.utils.translation import gettext as _
 
-
-class AddressFields(object):
-    # TODO: parse StructuredNodes into graphene ObjectTypes
-    addressLine1 = graphene.String()
-    addressLine2 = graphene.String()
-    city = graphene.String()
-    zipCode = graphene.String()
-    isGated = graphene.Boolean()
-
-
-class AddressType(graphene.ObjectType, AddressFields):
-    # TODO: Add resolution to associated users
-    pass
-
-
-
-CreateAddress = makeMutation(AddressFields, AddressType, Address)
+from neomodel import db
+from users.models import *
+from common.utils import modelSchema, getNodes
 
 
 class Query(UserQuery, MeQuery, ObjectType):
-    addresses = graphene.List(AddressType)
-
-    def resolve_addresses(self, info, **kwargs):
-        return getNodes(Address)
-
-    # client = graphene.Field(ClientType, id=graphene.Int())
-    # clients = graphene.List(ClientType)
-    # employee = graphene.Field(EmployeeType, id=graphene.Int())
-    # employees = graphene.List(EmployeeType)
-
-    # def resolve_auth(self, info, **kwargs):
-    #     return
-
-    # def resolve_client(self, info, **kwargs):
-    #     id = kwargs.get('id')
-    #     name = kwargs.get('name')
-    #     if id is not None:
-    #         return Client.objects.get(pk=id)
-    #     return None
-
-    # def resolve_client_by_name(self, info, name):
-    #     return
-
-    # def resolve_clients(self, info, **kwargs):
-    #     return Client.objects.all()
-
-    # def resolve_employee(self, info, **kwargs):
-    #     id = kwargs.get('id')
-
-    #     if id is not None:
-    #         return Employee.objects.get(pk=id)
-
-    #     return None
-
-    # def resolve_employees(self, info, **kwargs):
-    #     return Employee.objects.all()
+    pass
 
 
 class DBRegistrationError(exceptions.GraphQLAuthError):
@@ -128,7 +73,6 @@ class AuthMutation(graphene.ObjectType):
 
 class Mutation(AuthMutation, graphene.ObjectType):
     social_auth = graphql_social_auth.SocialAuth.Field()
-    create_address = CreateAddress.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
