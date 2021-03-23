@@ -44,7 +44,7 @@ class Estimate(StructuredNode):
 
     notes = StringProperty()
     creationDate = DateTimeProperty(default_now=True)
-    client_made = BooleanProperty(default=True)
+    clientMade = BooleanProperty(default=True)
 
     estimator = RelationshipFrom(
         'users.models.User', 'CREATED')

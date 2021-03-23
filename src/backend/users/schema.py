@@ -11,6 +11,14 @@ from users.models import *
 from common.utils import modelSchema, getNodes
 
 
+class UserType(graphene.ObjectType):
+    uid = graphene.String()
+    username = graphene.String()
+    email = graphene.String()
+    firstName = graphene.String()
+    lastName = graphene.String()
+
+
 class Query(UserQuery, MeQuery, ObjectType):
     pass
 

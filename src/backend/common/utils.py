@@ -16,31 +16,25 @@ def modelSchema(modelobj, fieldsobj, typeobj, in_vars={}, rel_map={}):
 def makeInput(name, fieldsobj, vars={}):
     return type(f"{name}Input", (graphene.InputObjectType, fieldsobj), vars)
 
-# TODO: FIx return type display
-
 
 def makeMutation(inputobj, typeobj, modelobj, rel_map={}):
     name = modelobj.__name__
     l_name = name.lower()
     name_args = f"{l_name}_data"
 
-    # @db.transaction
+    # @login_required
     def mutate(root, info, **kwargs):
         try:
             data = kwargs[name_args]
             rel_data = {rel: data.pop(rel)
                         for rel in rel_map.keys() if rel in data}
-            # print("DATA", data)
-            item = typeobj(**data)
-            # print("ITEM", item.__dict__)
             node = saveDataToModel(data, modelobj)
-            # print("Hello", node)
+            item = typeobj(**node.__properties__)
             saveRelationships(node, rel_map, rel_data)
         except:
             print(f"Creation went wrong of object of type Create{name}")
             return mutation({l_name: None, "ok": False})
-        print(item.__dict__)
-        return mutation({l_name: item, "ok": True})
+        return mutation(**{l_name: item, "ok": True})
 
     mutation = type(f"Create{name}", (graphene.Mutation,),
                     {
@@ -49,7 +43,6 @@ def makeMutation(inputobj, typeobj, modelobj, rel_map={}):
         l_name: graphene.Field(typeobj),
         "mutate": mutate
     })
-    # print(mutation.__dict__)
     return mutation
 
 

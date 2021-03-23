@@ -1,10 +1,10 @@
 import graphene
 from graphene.types.argument import Argument
-from graphene_django.types import DjangoObjectType, ObjectType
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
 from common.utils import modelSchema, getNodes
+from users.schema import UserType
 
 
 class InclinationMeasure(graphene.Enum):
@@ -43,6 +43,7 @@ class EstimateFields(object):
 
 
 class AddressType(graphene.ObjectType, AddressFields):
+    id = graphene.String()
     # TODO: Add resolution to associated users
     pass
 
@@ -51,7 +52,11 @@ AddressInput, CreateAddress = modelSchema(Address, AddressFields, AddressType)
 
 
 class JobType(graphene.ObjectType, JobFields):
+    id = graphene.String()
     jid = graphene.String()
+    client_made = graphene.Boolean()
+    # client = graphene.List(UserType)
+    # roofer = graphene.List(UserType)
     # TODO: add resolutions for clients, workers and address
 
 
@@ -59,9 +64,13 @@ JobInput, CreateJob = modelSchema(Job, JobFields, JobType)
 
 
 class EstimateType(graphene.ObjectType, EstimateFields):
+    id = graphene.String()
     eid = graphene.String()
-    address = graphene.Field(AddressType)
-    job = graphene.Field(JobType)
+    creationDate = graphene.DateTime()
+    clientMade = graphene.Boolean()
+    # address = graphene.Field(AddressType)
+    # job = graphene.Field(JobType)
+    # estimator = graphene.List(UserType)
     # TODO: add resolution for estimators, job, address and price
 
 
@@ -78,10 +87,11 @@ EstimateInput, CreateEstimate = modelSchema(
 )
 
 
-class Query(ObjectType):
+class Query(graphene.ObjectType):
     addresses = graphene.List(AddressType)
     estimates = graphene.List(EstimateType)
     jobs = graphene.List(JobType)
+    # jobs = graphene.List(JobType)
 
     def resolve_addresses(self, info, **kwargs):
         return getNodes(Address)
