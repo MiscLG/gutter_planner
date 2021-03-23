@@ -13,7 +13,7 @@ class Address(StructuredNode):
     addressLine1 = StringProperty(required=True, unique_index=True)
     addressLine2 = StringProperty()
     city = StringProperty()
-    zipCode = StringProperty(Required=True)
+    zipCode = StringProperty(required=True)
     isGated = BooleanProperty()
     user = Relationship('users.models.User', 'ASSOCIATED_WITH')
 

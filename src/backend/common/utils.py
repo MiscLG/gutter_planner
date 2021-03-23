@@ -17,23 +17,24 @@ def makeInput(name, fieldsobj, vars={}):
     return type(f"{name}Input", (graphene.InputObjectType, fieldsobj), vars)
 
 
-def makeMutation(inputobj, typeobj, modelobj, rel_map={}):
+def makeMutation(inputobj, typeobj, modelobj, rel_map={}, identifiers={}):
     name = modelobj.__name__
     l_name = name.lower()
     name_args = f"{l_name}_data"
 
     # @login_required
     def mutate(root, info, **kwargs):
-        try:
-            data = kwargs[name_args]
-            rel_data = {rel: data.pop(rel)
-                        for rel in rel_map.keys() if rel in data}
-            node = saveDataToModel(data, modelobj)
-            item = typeobj(**node.__properties__)
-            saveRelationships(node, rel_map, rel_data)
-        except:
-            print(f"Creation went wrong of object of type Create{name}")
-            return mutation({l_name: None, "ok": False})
+        # try:
+        data = kwargs[name_args]
+        rel_data = {rel: data.pop(rel)
+                    for rel in rel_map.keys() if rel in data}
+        print(modelobj.defined_properties())
+        node = saveDataToModel(data, modelobj)
+        item = typeobj(**node.__properties__)
+        saveRelationships(node, rel_map, rel_data)
+        # except:
+        #     print(f"Creation went wrong of object of type Create{name}")
+        #     return mutation(**{l_name: None, "ok": False})
         return mutation(**{l_name: item, "ok": True})
 
     mutation = type(f"Create{name}", (graphene.Mutation,),
@@ -50,9 +51,10 @@ def makeMutation(inputobj, typeobj, modelobj, rel_map={}):
 @db.transaction
 def saveDataToModel(data, modelobj):
     # print(typeobj.__dict__)
-    node = modelobj(**data)
-    node.save()
-    return node
+    node = modelobj.create_or_update(data)
+    print(node)
+    node[0].save()
+    return node[0]
 
 # @db.transaction
 
