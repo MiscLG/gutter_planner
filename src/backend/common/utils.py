@@ -17,7 +17,7 @@ def makeInput(name, fieldsobj, vars={}):
     return type(f"{name}Input", (graphene.InputObjectType, fieldsobj), vars)
 
 
-def makeMutation(inputobj, typeobj, modelobj, rel_map={}, identifiers={}):
+def makeMutation(inputobj, typeobj, modelobj, rel_map={},):
     name = modelobj.__name__
     l_name = name.lower()
     name_args = f"{l_name}_data"
@@ -36,7 +36,7 @@ def makeMutation(inputobj, typeobj, modelobj, rel_map={}, identifiers={}):
         #     print(f"Creation went wrong of object of type Create{name}")
         #     return mutation(**{l_name: None, "ok": False})
         return mutation(**{l_name: item, "ok": True})
-
+    # TODO: Make Create an operation argument
     mutation = type(f"Create{name}", (graphene.Mutation,),
                     {
         "Arguments": type("Arguments", (), {name_args: inputobj(required=True)}),
@@ -45,6 +45,32 @@ def makeMutation(inputobj, typeobj, modelobj, rel_map={}, identifiers={}):
         "mutate": mutate
     })
     return mutation
+
+
+def makeDeletion(modelobj, identifiers):
+    def mutate(root, info, **kwargs):
+        message = "Item was deleted successfully!"
+        print(kwargs)
+        try:
+            deletion_item = modelobj.nodes.get_or_none(**kwargs)
+            # print(deletion_item)
+            if deletion_item:
+                deletion_item.delete()
+            else:
+                message = "Item with that identifier was not found"
+        except:
+            return deletion(ok=False, message="Item was not deleted")
+        return deletion(ok=True, message=message)
+
+    deletion = type(f"Delete{modelobj.__name__}", (graphene.Mutation,),
+                    {
+        "Arguments": type("Arguments", (), identifiers),
+        "ok": graphene.Boolean(),
+        "message": graphene.String(),
+        "mutate": mutate
+    })
+
+    return deletion
 
 
 # NEO4J METHODS

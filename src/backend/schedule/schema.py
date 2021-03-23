@@ -3,7 +3,7 @@ from graphene.types.argument import Argument
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import modelSchema, getNodes
+from common.utils import modelSchema, getNodes, makeDeletion
 from users.schema import UserType
 
 
@@ -49,6 +49,9 @@ class AddressType(graphene.ObjectType, AddressFields):
 
 
 AddressInput, CreateAddress = modelSchema(Address, AddressFields, AddressType)
+DeleteAddress = makeDeletion(Address, {
+    "addressLine1": graphene.String(required=True)
+})
 
 
 class JobType(graphene.ObjectType, JobFields):
@@ -61,6 +64,9 @@ class JobType(graphene.ObjectType, JobFields):
 
 
 JobInput, CreateJob = modelSchema(Job, JobFields, JobType)
+DeleteJob = makeDeletion(Job, {
+    "jid": graphene.String(required=True)
+})
 
 
 class EstimateType(graphene.ObjectType, EstimateFields):
@@ -85,6 +91,30 @@ EstimateInput, CreateEstimate = modelSchema(
         "job": Job,
     }
 )
+DeleteEstimate = makeDeletion(Estimate, {
+    "eid": graphene.String(required=True)
+})
+
+
+class DeleteNode(graphene.Mutation):
+    class Arguments:
+        unique_identifier = graphene.String(required=True)
+    ok = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(root, info, unique_identifier=None):
+        message = "Item was deleted successfully!"
+        try:
+            deletion_item = Address.nodes.get_or_none(
+                addressLine1=unique_identifier)
+            # print(deletion_item)
+            if deletion_item:
+                deletion_item.delete()
+            else:
+                message = "Item with that identifier was not found"
+        except:
+            return DeleteNode(ok=False, message="Item was not deleted")
+        return DeleteNode(ok=True, message=message)
 
 
 class Query(graphene.ObjectType):
@@ -107,6 +137,7 @@ class Mutation(graphene.ObjectType):
     create_address = CreateAddress.Field()
     create_estimate = CreateEstimate.Field()
     create_job = CreateJob.Field()
+    delete_address = DeleteAddress.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
