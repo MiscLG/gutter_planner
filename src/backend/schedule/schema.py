@@ -96,27 +96,6 @@ DeleteEstimate = makeDeletion(Estimate, {
 })
 
 
-class DeleteNode(graphene.Mutation):
-    class Arguments:
-        unique_identifier = graphene.String(required=True)
-    ok = graphene.Boolean()
-    message = graphene.String()
-
-    def mutate(root, info, unique_identifier=None):
-        message = "Item was deleted successfully!"
-        try:
-            deletion_item = Address.nodes.get_or_none(
-                addressLine1=unique_identifier)
-            # print(deletion_item)
-            if deletion_item:
-                deletion_item.delete()
-            else:
-                message = "Item with that identifier was not found"
-        except:
-            return DeleteNode(ok=False, message="Item was not deleted")
-        return DeleteNode(ok=True, message=message)
-
-
 class Query(graphene.ObjectType):
     addresses = graphene.List(AddressType)
     estimates = graphene.List(EstimateType)
@@ -138,6 +117,8 @@ class Mutation(graphene.ObjectType):
     create_estimate = CreateEstimate.Field()
     create_job = CreateJob.Field()
     delete_address = DeleteAddress.Field()
+    delete_job = DeleteJob.Field()
+    delete_estimate = DeleteEstimate()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
@@ -172,3 +153,22 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 #         estimate.create()
 #         ok = True
 #         return CreateEstimate(estimate=estimate, ok=ok)
+# class DeleteNode(graphene.Mutation):
+#     class Arguments:
+#         unique_identifier = graphene.String(required=True)
+#     ok = graphene.Boolean()
+#     message = graphene.String()
+
+#     def mutate(root, info, unique_identifier=None):
+#         message = "Item was deleted successfully!"
+#         try:
+#             deletion_item = Address.nodes.get_or_none(
+#                 addressLine1=unique_identifier)
+#             # print(deletion_item)
+#             if deletion_item:
+#                 deletion_item.delete()
+#             else:
+#                 message = "Item with that identifier was not found"
+#         except:
+#             return DeleteNode(ok=False, message="Item was not deleted")
+#         return DeleteNode(ok=True, message=message)
