@@ -118,57 +118,7 @@ class Mutation(graphene.ObjectType):
     create_job = CreateJob.Field()
     delete_address = DeleteAddress.Field()
     delete_job = DeleteJob.Field()
-    delete_estimate = DeleteEstimate()
+    delete_estimate = DeleteEstimate.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
-
-# class JobInput(graphene.InputObjectType, JobFields):
-#     pass
-# class EstimateInput(graphene.InputObjectType, EstimateFields):
-#     pass
-# class CreateJob(graphene.Mutation):
-#     class Arguments:
-#         j_data = JobInput(required=True)
-#     ok = graphene.Boolean()
-#     job = graphene.Field(JobType)
-#     def mutate(root, info, j_data=None):
-#         job = JobType(
-#             **j_data.__dict__
-#         )
-#         job.create()
-#         ok = True
-#         return CreateJob(job=job, ok=ok)
-# class CreateEstimate(graphene.Mutation):
-#     class Arguments:
-#         e_data = EstimateInput(required=True)
-
-#     ok = graphene.Boolean()
-#     estimate = graphene.Field(EstimateType)
-
-#     def mutate(root, info, e_data=None):
-#         estimate = EstimateType(
-#             **e_data.__dict__
-#         )
-#         estimate.create()
-#         ok = True
-#         return CreateEstimate(estimate=estimate, ok=ok)
-# class DeleteNode(graphene.Mutation):
-#     class Arguments:
-#         unique_identifier = graphene.String(required=True)
-#     ok = graphene.Boolean()
-#     message = graphene.String()
-
-#     def mutate(root, info, unique_identifier=None):
-#         message = "Item was deleted successfully!"
-#         try:
-#             deletion_item = Address.nodes.get_or_none(
-#                 addressLine1=unique_identifier)
-#             # print(deletion_item)
-#             if deletion_item:
-#                 deletion_item.delete()
-#             else:
-#                 message = "Item with that identifier was not found"
-#         except:
-#             return DeleteNode(ok=False, message="Item was not deleted")
-#         return DeleteNode(ok=True, message=message)
