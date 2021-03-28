@@ -3,8 +3,11 @@ from graphene.types.argument import Argument
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import modelSchema, getNodes, makeDeletion
+from common.utils import modelSchema, getNodes, makeDeletion, makeUpdate
 from users.schema import UserType
+from users.models import User
+
+# TODO: Add Graphene descriptions for each object schema
 
 
 class InclinationMeasure(graphene.Enum):
@@ -48,8 +51,7 @@ class AddressType(graphene.ObjectType, AddressFields):
     pass
 
 
-AddressInput, CreateAddress = modelSchema(Address, AddressFields, AddressType)
-DeleteAddress = makeDeletion(Address, {
+AddressOperations = modelSchema(Address, AddressFields, AddressType, identifiers={
     "addressLine1": graphene.String(required=True)
 })
 
@@ -58,13 +60,12 @@ class JobType(graphene.ObjectType, JobFields):
     id = graphene.String()
     jid = graphene.String()
     client_made = graphene.Boolean()
-    # client = graphene.List(UserType)
-    # roofer = graphene.List(UserType)
+    client = graphene.List(graphene.String)
+    roofer = graphene.List(graphene.String)
     # TODO: add resolutions for clients, workers and address
 
 
-JobInput, CreateJob = modelSchema(Job, JobFields, JobType)
-DeleteJob = makeDeletion(Job, {
+JobOperations = modelSchema(Job, JobFields, JobType, identifiers={
     "jid": graphene.String(required=True)
 })
 
@@ -74,26 +75,29 @@ class EstimateType(graphene.ObjectType, EstimateFields):
     eid = graphene.String()
     creationDate = graphene.DateTime()
     clientMade = graphene.Boolean()
-    # address = graphene.Field(AddressType)
-    # job = graphene.Field(JobType)
-    # estimator = graphene.List(UserType)
+    address = graphene.Field(AddressType)
+    job = graphene.Field(JobType)
+    estimator = graphene.Field(UserType)
     # TODO: add resolution for estimators, job, address and price
 
 
-EstimateInput, CreateEstimate = modelSchema(
+EstimateOperations = modelSchema(
     Estimate, EstimateFields, EstimateType,
     in_vars={
-        "address": AddressInput(),
-        "job": JobInput(),
+        "eid": graphene.String(),
+        "estimator": graphene.String(),
+        "address": AddressOperations["input"](),
+        "job": JobOperations["input"](),
     },
     rel_map={
-        "address": Address,
-        "job": Job,
+        "address": (Address, AddressType),
+        "job": (Job, JobType),
+        "estimator": (User, UserType),
+    },
+    identifiers={
+        "eid": graphene.String(required=True),
     }
 )
-DeleteEstimate = makeDeletion(Estimate, {
-    "eid": graphene.String(required=True)
-})
 
 
 class Query(graphene.ObjectType):
@@ -113,12 +117,15 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    create_address = CreateAddress.Field()
-    create_estimate = CreateEstimate.Field()
-    create_job = CreateJob.Field()
-    delete_address = DeleteAddress.Field()
-    delete_job = DeleteJob.Field()
-    delete_estimate = DeleteEstimate.Field()
+    create_address = AddressOperations["create"].Field()
+    create_job = JobOperations["create"].Field()
+    create_estimate = EstimateOperations["create"].Field()
+    delete_address = AddressOperations["delete"].Field()
+    delete_job = JobOperations["delete"].Field()
+    delete_estimate = EstimateOperations["delete"].Field()
+    update_address = AddressOperations["update"].Field()
+    update_job = JobOperations["update"].Field()
+    update_estimate = EstimateOperations["update"].Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
