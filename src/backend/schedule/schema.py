@@ -3,11 +3,16 @@ from graphene.types.argument import Argument
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import modelSchema, getNodes, makeDeletion, makeUpdate
+from common.utils import modelSchema, getNodes, makeInput
 from users.schema import UserType
 from users.models import User
 
 # TODO: Add Graphene descriptions for each object schema
+
+UserInput = makeInput("User", None, vars={
+    "username": graphene.String(),
+    "email": graphene.String()
+})
 
 
 class InclinationMeasure(graphene.Enum):
@@ -60,14 +65,24 @@ class JobType(graphene.ObjectType, JobFields):
     id = graphene.String()
     jid = graphene.String()
     client_made = graphene.Boolean()
-    client = graphene.List(graphene.String)
-    roofer = graphene.List(graphene.String)
+    client = graphene.Field(UserType)
+    roofer = graphene.Field(UserType)
     # TODO: add resolutions for clients, workers and address
 
 
-JobOperations = modelSchema(Job, JobFields, JobType, identifiers={
-    "jid": graphene.String(required=True)
-})
+JobOperations = modelSchema(
+    Job, JobFields, JobType,
+    in_vars={
+        "client": UserInput(),
+        "roofer": UserInput()
+    },
+    rel_map={
+        "client": (User, UserType),
+        "roofer": (User, UserType)
+    },
+    identifiers={
+        "jid": graphene.String(required=True)
+    },)
 
 
 class EstimateType(graphene.ObjectType, EstimateFields):
@@ -85,7 +100,7 @@ EstimateOperations = modelSchema(
     Estimate, EstimateFields, EstimateType,
     in_vars={
         "eid": graphene.String(),
-        "estimator": graphene.String(),
+        "estimator": UserInput(),
         "address": AddressOperations["input"](),
         "job": JobOperations["input"](),
     },

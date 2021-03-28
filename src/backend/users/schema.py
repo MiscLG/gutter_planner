@@ -12,6 +12,7 @@ from common.utils import modelSchema, getNodes
 
 
 class UserType(graphene.ObjectType):
+    id = graphene.String()
     uid = graphene.String()
     username = graphene.String()
     email = graphene.String()

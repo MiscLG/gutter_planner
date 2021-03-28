@@ -15,7 +15,7 @@ def modelSchema(modelobj, fieldsobj, typeobj, in_vars={}, rel_map={}, identifier
         "update": None,
         "delete": None
     }
-    schema["input"] = makeInput(modelobj.__name__, fieldsobj, in_vars)
+    schema["input"] = makeInput(modelobj.__name__, fieldsobj, vars=in_vars)
     schema["create"] = makeCreate(schema["input"], typeobj, modelobj, rel_map)
     if identifiers:
         schema["update"] = makeUpdate(
@@ -26,6 +26,8 @@ def modelSchema(modelobj, fieldsobj, typeobj, in_vars={}, rel_map={}, identifier
 
 
 def makeInput(name, fieldsobj, vars={}):
+    if not fieldsobj:
+        return type(f"{name}Input", (graphene.InputObjectType,), vars)
     return type(f"{name}Input", (graphene.InputObjectType, fieldsobj), vars)
 
 
@@ -99,8 +101,8 @@ def makeDeletion(modelobj, identifiers):
 @db.transaction
 def saveDataToModel(data, modelobj):
     print(data)
-    node = modelobj.create_or_update(data)
-    return node[0]
+    nodes = modelobj.create_or_update(data)
+    return nodes[0]
 
 
 def saveRelationships(node, rel_map, rel_data):
@@ -109,15 +111,26 @@ def saveRelationships(node, rel_map, rel_data):
         if relation in rel_data:
             # TODO:if necessary can specify a recursive call when defining an object
             # that needs a relationship
-            new_item = saveDataToModel(rel_data[relation], classes[0])
-            getattr(node, relation).connect(new_item)
-            result_obj[relation] = classes[-1](**new_item.__properties__)
+            try:
+                item = getNode(classes[0], rel_data[relation])
+            except:
+                item = saveDataToModel(rel_data[relation], classes[0])
+            getattr(node, relation).connect(item)
+            result_obj[relation] = classes[-1](**item.__properties__)
     return result_obj
+
+
+def getNode(modelobj, identifiers):
+    query = dict_to_match_query(identifiers)
+    cypher = f'MATCH (n {query}) RETURN n'
+    print("Q", cypher)
+    res = getNodes(modelobj, custom_cypher=cypher)
+    print("RES", res)
+    return res[0]  # if len(res) != 0 else None
 
 
 def updateNode(modelobj, identifiers, data):
     query = dict_to_match_query(identifiers)
-    print(query)
     cypher = f'MATCH (n {query}) SET n += $data RETURN n'
     return getNodes(modelobj, custom_cypher=cypher, props={
         "ids": identifiers, "data": data})
@@ -136,7 +149,8 @@ def getNodes(modelobj, max_num=5, custom_cypher=None, props=None):
 def dict_to_match_query(dict):
     query = "{"
     for key, val in dict.items():
-        query += f"{key} : '" + val+"'"
+        query += f"{key} : '" + val + \
+            ("' " if key == list(dict)[-1] else "', ")
     query += "}"
     return query
 
