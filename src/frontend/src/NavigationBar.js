@@ -42,11 +42,10 @@ function NavigationBar(props){
             </div>
             </AppBar>
             <div id="content">
-            <Switch>
+            
             <div id="page">
                 {props.children}
             </div>
-            </Switch>
             
             <Tabs
             orientation="vertical"

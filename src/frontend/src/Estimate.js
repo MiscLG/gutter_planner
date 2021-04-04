@@ -2,16 +2,22 @@ import React, {useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
 
 import {Checkbox,FormControlLabel,InputAdornment, TextField,Select,Typography} from "@material-ui/core"
+import { handleInput } from "./utilities";
 
 
 function Estimate(){
     const [error, setError] = useState(null);
+    const [AddressVars, setAddressVars] = useState({})
+    const [estimateVars, setEstimateVars] = useState({})
     // const [clientQuery, setCQuery] = useState([]);
     let history = useHistory();
     const submitEstimate = async ()=> {
+        //Call API iwth Address Field
         console.log("Submitted the form")
     }
 
+    const handleAddressInput = handleInput(AddressVars,setAddressVars)
+    const handleEstimateInput = handleInput(AddressVars,setAddressVars)
     //fills page with api results
     const EstimateForm = (
         <form onSubmit={submitEstimate}>
@@ -135,7 +141,7 @@ function Estimate(){
     return (
         <div >
             {history.push("/estimate")}
-            <Typography variant="h4" >
+            <Typography variant="h4" margin="auto" >
                 Please enter your address: 
             </Typography>
             <TextField 
