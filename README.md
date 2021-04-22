@@ -79,12 +79,12 @@ Additionally, one must, add API and Database Keys to the .env files of the Djang
 
 For Django: 
 
-`GOOGLE_CLIENT_ID = ""
-GOOGLE_SECRET = ""
-NEO4J_USERNAME= ""
-NEO4J_PASSWORD = ""`
+`GOOGLE_CLIENT_ID = ""`
+`GOOGLE_SECRET = ""`
+`NEO4J_USERNAME= ""`
+`NEO4J_PASSWORD = ""`
 
 For React: 
 
-`REACT_APP_BACKEND_ADDRESS="http://localhost:8000/"
-REACT_APP_GOOGLE_CLIENT=""`
+`REACT_APP_BACKEND_ADDRESS="http://localhost:8000/"`
+`REACT_APP_GOOGLE_CLIENT=""`
