@@ -5,11 +5,6 @@ A web application for optimizing a rain gutter businesss written in Python and J
 
 ## Incomplete: In Progress
 
-#### Example:
-
-This project is currently in development. Users can log in and schedule estimate. The 
-UX for this process has not been completed and as of yet the data is not visible. 
-
 ## gutter_planner file structure
 
 React.js web front end in /src/frontend
@@ -68,6 +63,8 @@ Database: A user will need to install Neo4j using the installation instructions 
 Once installed, a database should be added and a password set for the database. 
 
 Additionally, one must, add API and Database Keys to the .env files of the Django project and the React project. 
+
+### Dotenv variables.
 
 For Django, add a dotenv file: `touch src/backend/gutterplanner/.env` 
 
