@@ -4,6 +4,7 @@
 A web application for optimizing a rain gutter businesss written in Python and JSX. 
 
 ## Incomplete: In Progress
+Most of the app's frontend is in-progress. The react-native frontend for an app is unimplemented. 
 
 ## gutter_planner file structure
 
