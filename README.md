@@ -1,11 +1,4 @@
-# gutter_planner
-This is the repository for an experimental web app for a small raingutter repair business.
 
-React.js web front end in /src/frontend
-
-Django backend in /src/backend
-
-unimplemented React Native frontend in /src/app-frontend
 
 ## Gutter Planner
 A web application for optimizing a rain gutter businesss written in Python and JSX. 
@@ -17,13 +10,13 @@ A web application for optimizing a rain gutter businesss written in Python and J
 This project is currently in development. Users can log in and schedule estimate. The 
 UX for this process has not been completed and as of yet the data is not visible. 
 
-## Project Screen Shot(s)
+## gutter_planner file structure
 
-#### Example:   
+React.js web front end in /src/frontend
 
-[ PRETEND SCREEN SHOT IS HERE ]
+Django backend in /src/backend/gutter_planner
 
-[ PRETEND OTHER SCREEN SHOT IS HERE ]
+Unimplemented React Native frontend in /src/app-frontend
 
 ## Installation and Setup Instructions
 
@@ -34,7 +27,6 @@ React.js. Additionally, the backend requires that a Neo4J database be setup for 
 Installation:
 
 (It is recommended that one works in a virtual env: `python3 -m venv [env-name] && source [env-name]/bin/activate`)
-
 
 Add API Keys in the .env. 
 
@@ -77,7 +69,7 @@ Once installed, a database should be added and a password set for the database.
 
 Additionally, one must, add API and Database Keys to the .env files of the Django project and the React project. 
 
-For Django: 
+For Django, add a dotenv file: `touch src/backend/gutterplanner/.env` 
 
 `GOOGLE_CLIENT_ID = ""`
 
@@ -87,7 +79,7 @@ For Django:
 
 `NEO4J_PASSWORD = ""`
 
-For React: 
+For React, add a dotenv file: `touch src/frontend/.env` 
 
 `REACT_APP_BACKEND_ADDRESS="http://localhost:8000/"`
 
