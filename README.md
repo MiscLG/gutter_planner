@@ -24,8 +24,6 @@ Installation:
 
 (It is recommended that one works in a virtual env: `python3 -m venv [env-name] && source [env-name]/bin/activate`)
 
-Add API Keys in the .env. 
-
 ### Backend:
 `pip3 install -r requirements.txt` will install the required packages for the app. 
 
@@ -69,7 +67,7 @@ Additionally, one must, add API and Database Keys to the .env files of the Djang
 
 For Django, add a dotenv file: `touch src/backend/gutterplanner/.env` 
 
-`GOOGLE_CLIENT_ID = ""`
+`GOOGLE_CLIENT_ID = ""` can be found from the Google Cloud Console.
 
 `GOOGLE_SECRET = ""`
 
