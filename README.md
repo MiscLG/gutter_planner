@@ -77,4 +77,14 @@ Once installed, a database should be added and a password set for the database.
 
 Additionally, one must, add API and Database Keys to the .env files of the Django project and the React project. 
 
- 
+For Django: 
+
+`GOOGLE_CLIENT_ID = ""
+GOOGLE_SECRET = ""
+NEO4J_USERNAME= ""
+NEO4J_PASSWORD = ""`
+
+For React: 
+
+`REACT_APP_BACKEND_ADDRESS="http://localhost:8000/"
+REACT_APP_GOOGLE_CLIENT=""`
