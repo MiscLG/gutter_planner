@@ -30,7 +30,7 @@ Installation:
 
 Add API Keys in the .env. 
 
-###Backend:
+### Backend:
 `pip3 install -r requirements.txt` will install the required packages for the app. 
 
 `python3 -m pip install Django` will install Django. 
@@ -51,7 +51,7 @@ To visit app (only API and admin is implemented):
 `localhost:8000/[admin or graphql]`
 
 
-###Frontend:
+### Frontend:
 
 `yarn install`  Installs frontend dependencies.
 
