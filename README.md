@@ -61,12 +61,12 @@ To visit app (only API and admin is implemented):
 
 ###Frontend:
 
-`yarn install`  
+`yarn install`  Installs frontend dependencies.
 
 
 To Start Server:
 
-`yarn start`  
+`yarn start`  will start the app.
 
 To Visit App:
 
@@ -83,7 +83,7 @@ For Django:
 
 `GOOGLE_SECRET = ""`
 
-`NEO4J_USERNAME= ""`
+`NEO4J_USERNAME= ""` This variable can be left as an empty string. 
 
 `NEO4J_PASSWORD = ""`
 
