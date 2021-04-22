@@ -59,7 +59,7 @@ To Visit App:
 
 `localhost:3000/`  
 
-Database: A user will need to install Neo4j using the installation instructions found on their website: https://neo4j.com/docs/operations-manual/current/installation/ 
+### Database: A user will need to install Neo4j using the installation instructions found on their website: https://neo4j.com/docs/operations-manual/current/installation/ 
 Once installed, a database should be added and a password set for the database. 
 
 Additionally, one must, add API and Database Keys to the .env files of the Django project and the React project. 
