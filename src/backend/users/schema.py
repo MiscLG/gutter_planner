@@ -28,25 +28,83 @@ class DBRegistrationError(exceptions.GraphQLAuthError):
     default_message = _("There was an error adding the user to our database.")
 
 
+def make_user(kwargs, callback):
+    #Work in progress
+    raise DBRegistrationError
+    usr = GPUser.objects.get(username=kwargs.get('username'))
+    try:
+        User(
+            username=kwargs.get('username'),
+            email=kwargs.get('email'),
+            user=usr
+        ).save()
+        return callback
+    except:
+        usr.delete()
+        # r_val = cls(success=False,
+        #             errors={'DatabaseError': "Could not add user to database"})
+        raise DBRegistrationError
+
+
 class customRegister(mutations.Register):
-    # TODO: modify social auth for extra redundancy checks and DB management
     @classmethod
     def resolve_mutation(cls, root, info, **kwargs):
+        print(kwargs.get("username"))
         r_val = super().resolve_mutation(root, info, **kwargs)
-        if r_val.success:
-            usr = GPUser.objects.get(username=kwargs.get('username'))
+        usr = GPUser.objects.get(username=kwargs.get('username'))
+        if r_val:
             try:
                 User(
                     username=kwargs.get('username'),
                     email=kwargs.get('email'),
                     user=usr
                 ).save()
+                return r_val
             except:
                 usr.delete()
                 r_val = cls(success=False,
                             errors={'DatabaseError': "Could not add user to database"})
                 raise DBRegistrationError
-        return r_val
+
+
+class SocialAuth(graphql_social_auth.SocialAuth):
+    @classmethod
+    def resolve_mutation(cls, root, info, **kwargs):
+        # print(kwargs.get("username"))
+        r_val = super().resolve_mutation(root, info, **kwargs)
+        usr = GPUser.objects.get(username=kwargs.get('username'))
+        if r_val:
+            try:
+                User(
+                    username=kwargs.get('username'),
+                    email=kwargs.get('email'),
+                    user=usr
+                ).save()
+                return r_val
+            except:
+                usr.delete()
+                r_val = cls(success=False,
+                            errors={'DatabaseError': "Could not add user to database"})
+                raise DBRegistrationError
+# class SocialAuth(graphql_social_auth.SocialAuthMutation):
+#     user = graphene.Field(UserType)
+
+#     @classmethod
+#     def resolve(cls, root, info, social, **kwargs):
+#         print(social, social.uid, social.id, social.provider, social.user)
+#         usr = GPUser.objects.get(username=social.user)
+#         try:
+#             User(
+#                 username=social.user,
+#                 email=social.uid,
+#                 user=usr
+#             ).save()
+#             return cls(user=social.user)
+#         except:
+#             usr.delete()
+#             # r_val = cls(success=False,
+#             #             errors={'DatabaseError': "Could not add user to database"})
+#             raise DBRegistrationError
 
 
 class AuthMutation(graphene.ObjectType):
@@ -74,7 +132,7 @@ class AuthMutation(graphene.ObjectType):
 
 
 class Mutation(AuthMutation, graphene.ObjectType):
-    social_auth = graphql_social_auth.SocialAuth.Field()
+    social_auth = SocialAuth.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

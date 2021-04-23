@@ -3,7 +3,7 @@ from graphene.types.argument import Argument
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import modelSchema, getNodes, makeInput
+from common.utils import modelSchema, getNode, getNodes, makeInput
 from users.schema import UserType
 from users.models import User
 
@@ -50,24 +50,22 @@ class EstimateFields(object):
     notes = graphene.String()
 
 
-class AddressType(graphene.ObjectType, AddressFields):
-    id = graphene.String()
-    # TODO: Add resolution to associated users
-    pass
-
-
-AddressOperations = modelSchema(Address, AddressFields, AddressType, identifiers={
-    "addressLine1": graphene.String(required=True)
-})
-
-
 class JobType(graphene.ObjectType, JobFields):
     id = graphene.String()
     jid = graphene.String()
     client_made = graphene.Boolean()
     client = graphene.Field(UserType)
     roofer = graphene.Field(UserType)
-    # TODO: add resolutions for clients, workers and address
+    clients = graphene.List(UserType)
+    roofers = graphene.List(UserType)
+
+    def resolve_clients(root, info):
+        job = Job.nodes.get(jid=root.jid)
+        return job.client.all()
+
+    def resolve_roofers(root, info):
+        job = Job.nodes.get(jid=root.jid)
+        return job.roofer.all()
 
 
 JobOperations = modelSchema(
@@ -85,6 +83,25 @@ JobOperations = modelSchema(
     },)
 
 
+class AddressType(graphene.ObjectType, AddressFields):
+    id = graphene.String()
+    users = graphene.List(UserType)
+    jobs = graphene.List(JobType)
+
+    def resolve_users(root, info):
+        address = Address.nodes.get(addressLine1=root.addressLine1)
+        return address.user.all()
+
+    def resolve_jobs(root, info):
+        cypher = f"Match (j:Job)-[:ESTIMATED_AS]->(e:Estimate)-[:DESIGNATED]->(a:Address {{addressLine1: '{root.addressLine1}'}}) RETURN j "
+        return getNodes(Job, custom_cypher=cypher)
+
+
+AddressOperations = modelSchema(Address, AddressFields, AddressType, identifiers={
+    "addressLine1": graphene.String(required=True)
+})
+
+
 class EstimateType(graphene.ObjectType, EstimateFields):
     id = graphene.String()
     eid = graphene.String()
@@ -93,7 +110,20 @@ class EstimateType(graphene.ObjectType, EstimateFields):
     address = graphene.Field(AddressType)
     job = graphene.Field(JobType)
     estimator = graphene.Field(UserType)
-    # TODO: add resolution for estimators, job, address and price
+    estimators = graphene.List(UserType)
+
+    def resolve_estimators(root, info):
+        estimate = Estimate.nodes.get(eid=root.eid)
+        return estimate.estimator.all()
+
+    def resolve_job(root, info):
+        estimate = Estimate.nodes.get(eid=root.eid)
+        print(estimate.job.all())
+        return estimate.job.single()
+
+    def resolve_address(root, info):
+        estimate = Estimate.nodes.get(eid=root.eid)
+        return estimate.address.single()
 
 
 EstimateOperations = modelSchema(
@@ -116,16 +146,27 @@ EstimateOperations = modelSchema(
 
 
 class Query(graphene.ObjectType):
+    address = graphene.Field(AddressType, addressLine1=graphene.String())
     addresses = graphene.List(AddressType)
+    estimate = graphene.Field(EstimateType, eid=graphene.String())
     estimates = graphene.List(EstimateType)
+    job = graphene.Field(JobType, jid=graphene.String())
     jobs = graphene.List(JobType)
-    # jobs = graphene.List(JobType)
+
+    def resolve_address(self, info, **kwargs):
+        return getNode(Address, kwargs)
 
     def resolve_addresses(self, info, **kwargs):
         return getNodes(Address)
 
+    def resolve_estimate(self, info, **kwargs):
+        return getNode(Estimate, kwargs)
+
     def resolve_estimates(self, info, **kwargs):
         return getNodes(Estimate)
+
+    def resolve_job(self, info, **kwargs):
+        return getNode(Job, kwargs)
 
     def resolve_jobs(self, info, **kwargs):
         return getNodes(Job)
