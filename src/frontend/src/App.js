@@ -2,30 +2,33 @@ import logo from './logo.svg';
 import React, {useState} from "react";
 import './App.css';
 import AdminPage from './AdminPage'
-import LoginPage from './LoginPage'
+import LoginPage from './login/LoginPage'
 import Estimate from './Estimate'
 import Home from './Home'
 import {NavigationBar as Nav} from './NavigationBar'
-import {BrowserRouter as Router,Redirect,Route} from "react-router-dom";
+import {BrowserRouter as Router,Redirect,Route,Switch} from "react-router-dom";
+import { useSelector } from 'react-redux'
 
 const App = () => {
-  const [loggedIn, setLoginStatus] = useState(true)
-  const [user,setUser] = useState({})
+  const loggedIn = useSelector(state=> state.user.loggedIn)
+  
   return (
     <Router>
       <Nav> 
-        <Route path="/">
-          <Home />
-        </Route>
-        <Route path="/admin">
-          { loggedIn ? <AdminPage />: <Redirect to="/login"/>}
-        </Route>
-        <Route path="/estimate">
-          {loggedIn? <Estimate/>: <Redirect to="/login"/>}
-        </Route>
-        <Route path="/login">
-         {loggedIn? <Redirect to="/"/>:<LoginPage/>}
-        </Route>
+        <Switch>
+          <Route path="/admin">
+            { loggedIn ? <AdminPage />: <Redirect to="/login"/>}
+          </Route>
+          <Route path="/estimate">
+            {loggedIn? <Estimate/>: <Redirect to="/login"/>}
+          </Route>
+          <Route path="/login">
+          {loggedIn? <Redirect to="/"/>:<LoginPage/>}
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
       </Nav>
     </Router>
   );

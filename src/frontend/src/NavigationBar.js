@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import './NavigationBar.css'
 import AdminPage from "./AdminPage";
-import GoogleLogin from "./GoogleLoginButton"
+import GoogleLogin from "./login/GoogleLoginButton"
 import {AppBar,Tabs,Tab,Typography,withStyles} from '@material-ui/core'
 // import {getClients} from "./API"
 
@@ -42,11 +42,10 @@ function NavigationBar(props){
             </div>
             </AppBar>
             <div id="content">
-            <Switch>
+            
             <div id="page">
                 {props.children}
             </div>
-            </Switch>
             
             <Tabs
             orientation="vertical"
