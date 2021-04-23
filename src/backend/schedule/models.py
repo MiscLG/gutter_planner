@@ -2,12 +2,20 @@ from django.db import models
 from neomodel import (StructuredNode, StructuredRel, StringProperty, DateTimeProperty,
                       FloatProperty, IntegerProperty, UniqueIdProperty, BooleanProperty, Relationship, RelationshipTo, RelationshipFrom)
 import datetime
-
-from neomodel.cardinality import OneOrMore, ZeroOrOne
 # Create your models here.
 
 DS_RATE = 10.00  # should be modified for business model
 G_RATE = 10.00  # should be modified for business model
+
+
+class Address(StructuredNode):
+    # use address module form elsewhere
+    addressLine1 = StringProperty(required=True, unique_index=True)
+    addressLine2 = StringProperty()
+    city = StringProperty()
+    zipCode = StringProperty(required=True)
+    isGated = BooleanProperty()
+    user = Relationship('users.models.User', 'ASSOCIATED_WITH')
 
 
 class Job(StructuredNode):
@@ -17,15 +25,9 @@ class Job(StructuredNode):
     dateFinished = DateTimeProperty()
 
     client = RelationshipFrom('users.models.User', 'ORDERS')
-    roofers = RelationshipTo('users.models.User', 'ASSIGNED_TO')
-    address = Relationship('users.models.Address', 'DESIGNATED')
+    roofer = RelationshipTo('users.models.User', 'ASSIGNED_TO')
 
 
-# class EstimateRel(StructuredRel):
-#     creationDate = DateTimeProperty(default_now=True)
-#     client_made = BooleanProperty(default=True)
-
-# Color Choices may become lists or enums
 class Estimate(StructuredNode):
     eid = UniqueIdProperty()
     roofType = StringProperty(required=True)
@@ -42,8 +44,15 @@ class Estimate(StructuredNode):
 
     notes = StringProperty()
     creationDate = DateTimeProperty(default_now=True)
-    client_made = BooleanProperty(default=True)
+    clientMade = BooleanProperty(default=True)
 
     estimator = RelationshipFrom(
         'users.models.User', 'CREATED')
     job = RelationshipFrom(Job, 'ESTIMATED_AS')
+    address = Relationship(Address, 'DESIGNATED')
+
+# class EstimateRel(StructuredRel):
+#     creationDate = DateTimeProperty(default_now=True)
+#     client_made = BooleanProperty(default=True)
+
+# Color Choices may become lists or enums

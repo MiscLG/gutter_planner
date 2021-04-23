@@ -1,17 +1,33 @@
 import graphene
 from graphene.types.argument import Argument
-from users.schema import AddressType
-from graphene_django.types import DjangoObjectType, ObjectType
 from graphene.types.scalars import String
 from neomodel import db
 from schedule.models import *
-from common.utils import makeMutation, getNodes
+from common.utils import modelSchema, getNodes, makeInput
+from users.schema import UserType
+from users.models import User
+
+# TODO: Add Graphene descriptions for each object schema
+
+UserInput = makeInput("User", None, vars={
+    "username": graphene.String(),
+    "email": graphene.String()
+})
 
 
 class InclinationMeasure(graphene.Enum):
     L = "low"
     C = "conventional"
     S = "steep"
+
+
+class AddressFields(object):
+    # TODO: parse StructuredNodes into graphene ObjectTypes
+    addressLine1 = graphene.String()
+    addressLine2 = graphene.String()
+    city = graphene.String()
+    zipCode = graphene.String()
+    isGated = graphene.Boolean()
 
 
 class JobFields(object):
@@ -34,19 +50,79 @@ class EstimateFields(object):
     notes = graphene.String()
 
 
+class AddressType(graphene.ObjectType, AddressFields):
+    id = graphene.String()
+    # TODO: Add resolution to associated users
+    pass
+
+
+AddressOperations = modelSchema(Address, AddressFields, AddressType, identifiers={
+    "addressLine1": graphene.String(required=True)
+})
+
+
 class JobType(graphene.ObjectType, JobFields):
+    id = graphene.String()
     jid = graphene.String()
+    client_made = graphene.Boolean()
+    client = graphene.Field(UserType)
+    roofer = graphene.Field(UserType)
     # TODO: add resolutions for clients, workers and address
 
 
+JobOperations = modelSchema(
+    Job, JobFields, JobType,
+    in_vars={
+        "client": UserInput(),
+        "roofer": UserInput()
+    },
+    rel_map={
+        "client": (User, UserType),
+        "roofer": (User, UserType)
+    },
+    identifiers={
+        "jid": graphene.String(required=True)
+    },)
+
+
 class EstimateType(graphene.ObjectType, EstimateFields):
+    id = graphene.String()
     eid = graphene.String()
+    creationDate = graphene.DateTime()
+    clientMade = graphene.Boolean()
+    address = graphene.Field(AddressType)
+    job = graphene.Field(JobType)
+    estimator = graphene.Field(UserType)
     # TODO: add resolution for estimators, job, address and price
 
 
-class Query(ObjectType):
+EstimateOperations = modelSchema(
+    Estimate, EstimateFields, EstimateType,
+    in_vars={
+        "eid": graphene.String(),
+        "estimator": UserInput(),
+        "address": AddressOperations["input"](),
+        "job": JobOperations["input"](),
+    },
+    rel_map={
+        "address": (Address, AddressType),
+        "job": (Job, JobType),
+        "estimator": (User, UserType),
+    },
+    identifiers={
+        "eid": graphene.String(required=True),
+    }
+)
+
+
+class Query(graphene.ObjectType):
+    addresses = graphene.List(AddressType)
     estimates = graphene.List(EstimateType)
     jobs = graphene.List(JobType)
+    # jobs = graphene.List(JobType)
+
+    def resolve_addresses(self, info, **kwargs):
+        return getNodes(Address)
 
     def resolve_estimates(self, info, **kwargs):
         return getNodes(Estimate)
@@ -56,40 +132,15 @@ class Query(ObjectType):
 
 
 class Mutation(graphene.ObjectType):
-    create_estimate = makeMutation(
-        EstimateFields, EstimateType, Estimate).Field()
-    create_job = makeMutation(JobFields, JobType, Job).Field()
+    create_address = AddressOperations["create"].Field()
+    create_job = JobOperations["create"].Field()
+    create_estimate = EstimateOperations["create"].Field()
+    delete_address = AddressOperations["delete"].Field()
+    delete_job = JobOperations["delete"].Field()
+    delete_estimate = EstimateOperations["delete"].Field()
+    update_address = AddressOperations["update"].Field()
+    update_job = JobOperations["update"].Field()
+    update_estimate = EstimateOperations["update"].Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
-
-# class JobInput(graphene.InputObjectType, JobFields):
-#     pass
-# class EstimateInput(graphene.InputObjectType, EstimateFields):
-#     pass
-# class CreateJob(graphene.Mutation):
-#     class Arguments:
-#         j_data = JobInput(required=True)
-#     ok = graphene.Boolean()
-#     job = graphene.Field(JobType)
-#     def mutate(root, info, j_data=None):
-#         job = JobType(
-#             **j_data.__dict__
-#         )
-#         job.create()
-#         ok = True
-#         return CreateJob(job=job, ok=ok)
-# class CreateEstimate(graphene.Mutation):
-#     class Arguments:
-#         e_data = EstimateInput(required=True)
-
-#     ok = graphene.Boolean()
-#     estimate = graphene.Field(EstimateType)
-
-#     def mutate(root, info, e_data=None):
-#         estimate = EstimateType(
-#             **e_data.__dict__
-#         )
-#         estimate.create()
-#         ok = True
-#         return CreateEstimate(estimate=estimate, ok=ok)
