@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import GoogleLogin from 'react-google-login';
-import {social_auth} from './API'
+import {social_auth} from '../API'
 
 const GoogleSocialAuth = () => {
     const [error,setError] = useState(null);

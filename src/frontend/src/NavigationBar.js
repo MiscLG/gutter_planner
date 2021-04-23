@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import './NavigationBar.css'
 import AdminPage from "./AdminPage";
-import GoogleLogin from "./GoogleLoginButton"
+import GoogleLogin from "./login/GoogleLoginButton"
 import {AppBar,Tabs,Tab,Typography,withStyles} from '@material-ui/core'
 // import {getClients} from "./API"
 

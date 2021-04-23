@@ -19,6 +19,10 @@ class UserType(graphene.ObjectType):
     firstName = graphene.String()
     lastName = graphene.String()
 
+    def resolve_isStaff(root, info):
+        usr = GPUser.objects.get(username=root.username)
+        return usr.is_staff
+
 
 class Query(UserQuery, MeQuery, ObjectType):
     pass

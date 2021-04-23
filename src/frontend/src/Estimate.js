@@ -3,6 +3,7 @@ import {useHistory} from "react-router-dom";
 
 import {Checkbox,FormControlLabel,InputAdornment, TextField,Select,Typography} from "@material-ui/core"
 import { handleInput } from "./utilities";
+import PlacesAutocompleteBar from "./PlacesAutocompleteBar"
 
 
 function Estimate(){
@@ -141,9 +142,11 @@ function Estimate(){
     return (
         <div >
             {history.push("/estimate")}
+
             <Typography variant="h4" margin="auto" >
                 Please enter your address: 
             </Typography>
+            {/* <PlacesAutocompleteBar/> */}
             <TextField 
             required
             type="search"
