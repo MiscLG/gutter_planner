@@ -48,7 +48,7 @@ class Estimate(StructuredNode):
 
     estimator = RelationshipFrom(
         'users.models.User', 'CREATED')
-    job = RelationshipFrom(Job, 'ESTIMATED_AS')
+    job = RelationshipFrom(Job, 'ESTIMATED_WITH')
     address = Relationship(Address, 'DESIGNATED')
 
 # class EstimateRel(StructuredRel):

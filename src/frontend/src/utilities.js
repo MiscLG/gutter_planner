@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 
 const handleInput = (hook,callback) => {
-    return (event) => 
+    return (event) => {
+    // console.log(event.target.type)
     callback({
         ...hook,
-        [event.target.name] : event.target.value
+        [event.target.name] : event.target.type==="number"? parseInt(event.target.value) :event.target.value 
     }) 
+  }
 }
 
 

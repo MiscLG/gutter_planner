@@ -1,14 +1,22 @@
 import graphene
 from six import add_metaclass
 from graphene_django.types import ObjectType
+from graphene_django import DjangoObjectType
 from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations, exceptions
 import graphql_social_auth
 from django.utils.translation import gettext as _
 
+
 from neomodel import db
 from users.models import *
-from common.utils import modelSchema, getNodes
+from common.utils import modelSchema, getNodes, getNode, makeInput
+
+
+class GPUserType(DjangoObjectType):
+    class Meta:
+        model = GPUser
+        fields = ("username", "email")
 
 
 class UserType(graphene.ObjectType):
@@ -18,6 +26,7 @@ class UserType(graphene.ObjectType):
     email = graphene.String()
     firstName = graphene.String()
     lastName = graphene.String()
+    isStaff = graphene.Boolean()
 
     def resolve_isStaff(root, info):
         usr = GPUser.objects.get(username=root.username)
@@ -25,7 +34,11 @@ class UserType(graphene.ObjectType):
 
 
 class Query(UserQuery, MeQuery, ObjectType):
-    pass
+    user = graphene.Field(UserType, uid=graphene.String(
+    ), username=graphene.String(), email=graphene.String())
+
+    def resolve_user(self, info, **kwargs):
+        return getNode(User, kwargs)
 
 
 class DBRegistrationError(exceptions.GraphQLAuthError):
@@ -71,44 +84,28 @@ class customRegister(mutations.Register):
                 raise DBRegistrationError
 
 
-class SocialAuth(graphql_social_auth.SocialAuth):
-    @classmethod
-    def resolve_mutation(cls, root, info, **kwargs):
-        # print(kwargs.get("username"))
-        r_val = super().resolve_mutation(root, info, **kwargs)
-        usr = GPUser.objects.get(username=kwargs.get('username'))
-        if r_val:
-            try:
-                User(
-                    username=kwargs.get('username'),
-                    email=kwargs.get('email'),
-                    user=usr
-                ).save()
-                return r_val
-            except:
-                usr.delete()
-                r_val = cls(success=False,
-                            errors={'DatabaseError': "Could not add user to database"})
-                raise DBRegistrationError
-# class SocialAuth(graphql_social_auth.SocialAuthMutation):
-#     user = graphene.Field(UserType)
+class SocialAuth(graphql_social_auth.SocialAuthMutation):
+    user_data = graphene.Field(UserType)
 
-#     @classmethod
-#     def resolve(cls, root, info, social, **kwargs):
-#         print(social, social.uid, social.id, social.provider, social.user)
-#         usr = GPUser.objects.get(username=social.user)
-#         try:
-#             User(
-#                 username=social.user,
-#                 email=social.uid,
-#                 user=usr
-#             ).save()
-#             return cls(user=social.user)
-#         except:
-#             usr.delete()
-#             # r_val = cls(success=False,
-#             #             errors={'DatabaseError': "Could not add user to database"})
-#             raise DBRegistrationError
+    @classmethod
+    def resolve(cls, root, info, social, **kwargs):
+        props = {
+            "username": social.user.username,
+            "email": social.user.email,
+            "firstName": social.user.first_name,
+            "lastName": social.user.last_name
+        }
+        usr = UserType(
+            **props
+        )
+        try:
+            User(
+                **props,
+                user=social.user
+            ).save()
+            return cls(user_data=usr)
+        except:
+            return cls(user_data=usr)
 
 
 class AuthMutation(graphene.ObjectType):

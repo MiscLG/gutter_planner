@@ -13,7 +13,8 @@ def modelSchema(modelobj, fieldsobj, typeobj, in_vars={}, rel_map={}, identifier
         "input": None,
         "create": None,
         "update": None,
-        "delete": None
+        "delete": None,
+        "set": None
     }
     schema["input"] = makeInput(modelobj.__name__, fieldsobj, vars=in_vars)
     schema["create"] = makeCreate(schema["input"], typeobj, modelobj, rel_map)
@@ -21,6 +22,8 @@ def modelSchema(modelobj, fieldsobj, typeobj, in_vars={}, rel_map={}, identifier
         schema["update"] = makeUpdate(
             schema["input"], typeobj, modelobj, identifiers.keys())
         schema["delete"] = makeDeletion(modelobj, identifiers)
+        schema["set"] = makeInput(
+            f"{modelobj.__name__}ID", None, vars=identifiers)
 
     return schema
 

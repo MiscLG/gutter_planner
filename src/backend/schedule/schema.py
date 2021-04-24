@@ -11,7 +11,10 @@ from users.models import User
 
 UserInput = makeInput("User", None, vars={
     "username": graphene.String(),
-    "email": graphene.String()
+    "email": graphene.String(),
+})
+SetUser = makeInput("UserID", None, vars={
+    "uid": graphene.String()
 })
 
 
@@ -72,7 +75,7 @@ JobOperations = modelSchema(
     Job, JobFields, JobType,
     in_vars={
         "client": UserInput(),
-        "roofer": UserInput()
+        "roofer": UserInput(),
     },
     rel_map={
         "client": (User, UserType),
@@ -85,6 +88,7 @@ JobOperations = modelSchema(
 
 class AddressType(graphene.ObjectType, AddressFields):
     id = graphene.String()
+    user = graphene.Field(UserType)
     users = graphene.List(UserType)
     jobs = graphene.List(JobType)
 
@@ -93,13 +97,21 @@ class AddressType(graphene.ObjectType, AddressFields):
         return address.user.all()
 
     def resolve_jobs(root, info):
-        cypher = f"Match (j:Job)-[:ESTIMATED_AS]->(e:Estimate)-[:DESIGNATED]->(a:Address {{addressLine1: '{root.addressLine1}'}}) RETURN j "
+        cypher = f"Match (j:Job)-[:ESTIMATED_WITH]->(e:Estimate)-[:DESIGNATED]->(a:Address {{addressLine1: '{root.addressLine1}'}}) RETURN j "
         return getNodes(Job, custom_cypher=cypher)
 
 
-AddressOperations = modelSchema(Address, AddressFields, AddressType, identifiers={
-    "addressLine1": graphene.String(required=True)
-})
+AddressOperations = modelSchema(
+    Address, AddressFields, AddressType,
+    in_vars={
+        "user": UserInput(),
+    },
+    rel_map={
+        "user": (User, UserType),
+    },
+    identifiers={
+        "addressLine1": graphene.String(required=True)
+    })
 
 
 class EstimateType(graphene.ObjectType, EstimateFields):
@@ -130,9 +142,9 @@ EstimateOperations = modelSchema(
     Estimate, EstimateFields, EstimateType,
     in_vars={
         "eid": graphene.String(),
-        "estimator": UserInput(),
+        "estimator": SetUser(),
         "address": AddressOperations["input"](),
-        "job": JobOperations["input"](),
+        "job": JobOperations["set"](),
     },
     rel_map={
         "address": (Address, AddressType),

@@ -1,14 +1,27 @@
 import React, {useState} from 'react';
 import GoogleLogin from 'react-google-login';
-import {social_auth} from '../API'
+import {useSelector,useDispatch} from 'react-redux'
+import {social_auth,getUser} from '../API'
 
 const GoogleSocialAuth = () => {
+    const user = useSelector(state => state.user)
+    const dispatch = useDispatch()
     const [error,setError] = useState(null);
+    const [userVars, setUserVars] = useState({});
     const googleResponse = async (response) => {
+        // console.log(response)
+        
+        // console.log(userVars)
         // console.log(response.accessToken);
         try{
           let backend_auth =  await social_auth({provider:"google-oauth2", accessToken: response.accessToken});
-          // console.log(backend_auth)
+          let res = await getUser({email:response.profileObj.email})
+          setUserVars({
+            ...userVars,
+            ...res.data.user
+          })
+          console.log(userVars)
+          dispatch({type:'loggedIn/registered', payload:userVars})
         } catch (error) {
           //  console.log(error)
            setError("Authentication Failed")
