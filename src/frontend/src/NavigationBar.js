@@ -8,7 +8,7 @@ import {
     useParams
 } from "react-router-dom";
 import './NavigationBar.css'
-import AdminPage from "./AdminPage";
+import UserPage from "./UserPage";
 import GoogleLogin from "./login/GoogleLoginButton"
 import {AppBar,Tabs,Tab,Typography,withStyles} from '@material-ui/core'
 // import {getClients} from "./API"
@@ -58,11 +58,11 @@ function NavigationBar(props){
                     <Tab label="Estimate"/>
                 </Link>
                 <Link 
-                to = {'/admin'}
+                to = {'/user'}
                 className="navigation"
-                id = "admin"
+                id = "user"
                 >
-                    <Tab label="Admin" />
+                    <Tab label="User" />
                 </Link>  
             </Tabs>
             

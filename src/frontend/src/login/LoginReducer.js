@@ -1,4 +1,5 @@
 const initialState = {
+    googleAuth:{},
     loggedIn:false,
     username:"",
     email:"",
@@ -7,6 +8,11 @@ const initialState = {
 }
 export default function loginReducer(state=initialState,action){
     switch(action.type){
+        case 'usedGoogleAuth':
+            return {
+                ...state,
+                googleAuth: action.payload
+            }
         case 'loggedIn/registered':
             return {
                 ...state,

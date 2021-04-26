@@ -94,7 +94,7 @@ const callAPI = async (query,variables={}) => {
         headers: {"Content-Type": "application/json", Accept: "application/json"},
         data: {query,variables}
     }
-    console.log(options)
+    // console.log(options)
     let response = await axios(options);
     return response.data;
 }

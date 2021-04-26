@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import React, {useState} from "react";
 import './App.css';
-import AdminPage from './AdminPage'
+import UserPage from './UserPage'
 import LoginPage from './login/LoginPage'
 import Estimate from './Estimate'
 import Home from './Home'
@@ -11,19 +11,18 @@ import { useSelector } from 'react-redux'
 
 const App = () => {
   const loggedIn = useSelector(state=> state.user.loggedIn)
-  
   return (
     <Router>
       <Nav> 
         <Switch>
-          <Route path="/admin">
-            { loggedIn ? <AdminPage />: <Redirect to="/login"/>}
+          <Route path="/user">
+            { loggedIn ? <UserPage />: <Redirect to="/login"/>}
           </Route>
           <Route path="/estimate">
             {loggedIn? <Estimate/>: <Redirect to="/login"/>}
           </Route>
           <Route path="/login">
-          {loggedIn? <Redirect to="/"/>:<LoginPage/>}
+            {loggedIn? <Redirect to="/"/>:<LoginPage/>}
           </Route>
           <Route path="/">
             <Home />

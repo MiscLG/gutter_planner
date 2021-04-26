@@ -1,70 +1,44 @@
 import React, {useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useSelector,useDispatch} from "react-redux";
 import {Checkbox,FormControlLabel,InputAdornment, TextField,Select,Typography} from "@material-ui/core";
-import { handleInput } from "./utilities";
+import { handleInput,handleReduxInput } from "./utilities";
 import {addAddress, addJob, addEstimate } from "./API";
 import PlacesAutocompleteBar from "./PlacesAutocompleteBar"
+import AddressInputForm from "./userData/addressInputForm"
 
 
 function Estimate(){
     const user = useSelector(state=>state.user)
-    const [error, setError] = useState(null);
-    const [addressVars, setAddressVars] = useState({
-        isGated:false,
-        addressLine2:"",
-    })
-    const [jobVars,setJobVars] = useState({})
-    const [estimateVars, setEstimateVars] = useState({
-        roofType:"Shingle",
-        roofInclination:"L",
-        spaciousGround:false,
-        numFloors: 1,
-        notes:"",
-    })
-    // const [clientQuery, setCQuery] = useState([]);
+    const estimateData = useSelector(state=>state.estimate)
+    const dispatch = useDispatch()
+    const estimateVars = useSelector(state=> state.estimate.estimate)
     let history = useHistory();
-    const submitAddress = async (event)=> {
-        event.preventDefault()
-        //Call API iwth Address Field
-        console.log(user)
-        console.log(addressVars)
-        console.log({...addressVars, username:user.username})
-        try{
-            let result = await addAddress({...addressVars,username:user.username})
-            let job = await addJob({email:user.email,username:user.username})
-            console.log(job)
-            setJobVars(job.data.createJob.job)
-        }catch(error){
-            console.log(error)
-            setError("Something went wrong.");
-        }
-        console.log("Submitted the form")
-    }
-    const submitEstimate = async (event)=> {
-        event.preventDefault()
-        //Call API iwth Address Field
-        console.log(user)
-        console.log(estimateVars)
-        console.log({...estimateVars,addressLine1:addressVars.addressLine1,jid:jobVars.jid,uid:user.uid})
 
-        try{
-            let result = await addEstimate({...estimateVars,addressLine1:addressVars.addressLine1,jid:jobVars.jid,uid:user.uid})
-            console.log(result)
-        }catch(error){
-            console.log(error)
-            // setError("Something went wrong.");
+    const commit = async() => {
+        if (estimateData.finished){
+            let address = await addAddress({...estimateData.address,...user})
+            address = address.data.createAddress.address
+            let job = await addJob({...estimateData.job,...user})
+            job = job.data.createJob.job
+            // let information = {...estimateVars,...address,...job,...user}
+            let estimate = await addEstimate({...estimateVars,...address,...job,...user})
+            console.log(estimate.data.createEstimate.estimate)
+        } else {
+            dispatch({type:"checkFinished"})
+            console.log("Try again in a moment")
         }
-        console.log("Submitted the form")
     }
+    const submitForm= async (event)=> {
+        event.preventDefault()
+        await dispatch({type:"updateEstimate", payload:estimateVars})
+        commit()
+    }
+    
+    const handleEstimateInput = handleReduxInput("updateEstimate",dispatch)
 
-    const handleAddressInput = handleInput(addressVars,setAddressVars)
-    const handleEstimateInput = handleInput(estimateVars,setEstimateVars)
-    const handleChecked = (event) => setAddressVars({...addressVars, [event.target.name]:event.target.checked})
-    const handleEstimateChecked = (event) => setEstimateVars({...estimateVars, [event.target.name]:event.target.checked})
-    //fills page with api results
     const EstimateForm = (
-        <form onSubmit={submitEstimate}>
+        <form onSubmit={submitForm}>
             <Typography variant="subtitle" component="h3">
                 Please provide the following information
             </Typography>
@@ -72,7 +46,7 @@ function Estimate(){
             <FormControlLabel 
             label="Is there ample floor space to place ladders, materials, and any removed metal?"
             labelPlacement="start"
-            control={<Checkbox checked={estimateVars.spaciousGround} name="spaciousGround" onChange={handleEstimateChecked}/>}
+            control={<Checkbox checked={estimateVars.spaciousGround} name="spaciousGround" onChange={handleEstimateInput}/>}
             />
             <p/>
             <FormControlLabel
@@ -182,64 +156,16 @@ function Estimate(){
         </form>
     )
     
-    //calls the api on load
-    useEffect(()=>{
-        // history.push("/admin");
-        // queryClient();
-    },[]);
 
     return (
         <div >
             {history.push("/estimate")}
-            <form onSubmit={submitAddress}>
-                <Typography variant="h4" margin="auto">
-                    Please enter your address: 
-                </Typography>
-                {/* <PlacesAutocompleteBar/> */}
-                <TextField 
-                required
-                type="search"
-                label="Address Line 1:"
-                fullWidth
-                // variant="filled"
-                name="addressLine1"
-                onChange={handleAddressInput}
-                />
-                <p/>
-                <TextField 
-                label="Address Line 2:"
-                fullWidth
-                // variant="filled"
-                name="addressLine2"
-                onChange={handleAddressInput}
-                />
-                <p/>
-                <TextField 
-                label="City:"
-                name="city"
-                onChange={handleAddressInput}
-                />
-                <TextField 
-                required
-                label="Zip Code:"
-                name="zipCode"
-                onChange={handleAddressInput}
-                />
-                <p/>
-                <FormControlLabel 
-                label="Will we need an access code to enter? "
-                labelPlacement="start"
-                control={<Checkbox name="isGated" checked={addressVars.isGated} onChange={handleChecked} />}
-                /> 
-                <p/>
-                <input type="submit" value="Submit"/>
-            </form>
+            <AddressInputForm 
+            useAutofill={true}
+            />
             <div>
-                {
-                    error ? (<div className="error">{error}</div>):  (EstimateForm)
-                }
-            </div>
-                
+                 {EstimateForm}
+            </div>   
         </div>
         
     )

@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
 import {getUsers} from "./API"
+import GoogleCalendarLoader from "./API/GoogleCalendarLoader"
 
 
-function AdminPage(){
+function UserPage(){
     const [error, setError] = useState(null);
     const [userQuery, setUQuery] = useState([]);
     let history = useHistory();
@@ -40,8 +41,9 @@ function AdminPage(){
 
     return (
         <div >
-            {history.push("/admin")}
-            <h1> Admin Page </h1>
+            {history.push("/user")}
+            <GoogleCalendarLoader/>
+            <h1> User Page </h1>
             <div>
                 {
                     error ? (<div className="error">{error}</div>):  (userList)
@@ -53,4 +55,4 @@ function AdminPage(){
 
 };
 
-export default AdminPage;
+export default UserPage;
