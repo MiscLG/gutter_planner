@@ -39,7 +39,7 @@ function Estimate(){
 
     const EstimateForm = (
         <form onSubmit={submitForm}>
-            <Typography variant="subtitle" component="h3">
+            <Typography variant="subtitle1" component="h3">
                 Please provide the following information
             </Typography>
             <p/>

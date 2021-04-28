@@ -37,7 +37,7 @@ const GoogleSocialAuth = () => {
       autoLoad={false}
       cookiePolicy={'single_host_origin'}
       isSignedIn={user.loggedIn}
-      scope={"https://www.googleapis.com/auth/calendar.readonly"}
+      scope={"https://www.googleapis.com/auth/calendar"}
       discoveryDocs={[["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]]}
     />
   )
