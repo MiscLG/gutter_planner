@@ -25,3 +25,6 @@ class User(StructuredNode):
     firstName = StringProperty(max_length=MAX_NAME_LENGTH)
     lastName = StringProperty(max_length=MAX_NAME_LENGTH)
     user = models.OneToOneField(GPUser, on_delete=models.CASCADE)
+
+    job = RelationshipTo('schedule.models.Job', 'ORDERS')
+    address = Relationship('schedule.models.Address', 'ASSOCIATED_WITH')

@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react";
 import { useSelector } from 'react-redux'
-import {useScript,updateArrayHook} from '../utilities'
+import {useScript,updateArrayHook,find_open_time_for} from '../utilities'
 import Button from '@material-ui/core/Button'
 import {getCalendar} from './CalendarAPI'
+
 
 
 const GoogleCalendarLoader = () => {
@@ -10,9 +11,23 @@ const GoogleCalendarLoader = () => {
   const loggedIn = useSelector(state=> state.user.loggedIn)
   const [messages,setMessages]= useState([])
   const pushMessage = updateArrayHook(messages,setMessages)
+  const [openSlots,setOpenSlots] = useState({})
+  const [avalability,setAvailability] = useState({})
 
   let CAL_DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
   let CAL_SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+  const getOpenSlots = ()=>{
+
+    let today = new Date()
+    today.setHours(7,0,0,0)
+    let tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate()+1)
+    let event=Object;
+    event.min_start = tomorrow;
+    event.duration_in_hours=0.50;
+    setOpenSlots(find_open_time_for(event,avalability))
+  }
 
   console.log(gapi)
   /**
@@ -70,56 +85,125 @@ const GoogleCalendarLoader = () => {
        *
        * @param {string} message Text to be placed in pre element.
        */
-   function appendPre(message) {
-    pushMessage(message);
-  }
-  /**
+    function appendPre(message) {
+      pushMessage(message);
+    }
+    /**
        * Print the summary and start datetime/date of the next ten events in
        * the authorized user's calendar. If no events are found an
        * appropriate message is printed.
        */
-   function listUpcomingEvents() {
-     console.log(process.env.REACT_APP_CALENDAR_ID)
-    gapi.client.calendar.events.list({
-      'calendarId': process.env.REACT_APP_CALENDAR_ID,
-      'timeMin': (new Date()).toISOString(),
-      'showDeleted': false,
-      'singleEvents': true,
-      'maxResults': 10,
-      'orderBy': 'startTime'
-    }).then(function(response) {
-      var events = response.result.items;
-      appendPre('Upcoming events:');
+    function listUpcomingEvents() {
+      console.log(process.env.REACT_APP_CALENDAR_ID)
+      gapi.client.calendar.events.list({
+        'calendarId': process.env.REACT_APP_CALENDAR_ID,
+        'timeMin': (new Date()).toISOString(),
+        'showDeleted': false,
+        'singleEvents': true,
+        'maxResults': 10,
+        'orderBy': 'startTime'
+      }).then(function(response) {
+        var events = response.result.items;
+        appendPre('Upcoming events:');
 
-      if (events.length > 0) {
-        for (let i = 0; i < events.length; i++) {
-          var event = events[i];
-          var when = event.start.dateTime;
-          if (!when) {
-            when = event.start.date;
+        if (events.length > 0) {
+          for (let i = 0; i < events.length; i++) { 
+            var event = events[i];
+            var when = event.start.dateTime;
+            if (!when) {
+              when = event.start.date;
+            }
+            appendPre(event.summary + ' (' + when + ')')
           }
-          appendPre(event.summary + ' (' + when + ')')
+        } else {
+          appendPre('No upcoming events found.');
         }
-      } else {
-        appendPre('No upcoming events found.');
-      }
-    });
-  }
+      });
+    }
+    function freeBusy(){
+      let today = new Date()
+      today.setHours(7,0,0,0)
+      let tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate()+1)
+      let nextWeek = new Date(tomorrow)
+      nextWeek.setDate(nextWeek.getDate()+7)
+      nextWeek.setHours(15,0,0,0)
+
+      console.log(gapi.client.calendar)
+      gapi.client.calendar.freebusy.query({
+        "timeMin": tomorrow.toISOString(),
+        "timeMax": nextWeek.toISOString(),
+        "timeZone": "PDT",
+        "groupExpansionMax": 3,
+        "calendarExpansionMax": 5,
+        "items": [
+          {
+            "id": process.env.REACT_APP_CALENDAR_ID
+          }
+        ]
+      }).then((res)=>{
+        setAvailability(res.result.calendars[process.env.REACT_APP_CALENDAR_ID].busy)
+      })
+    }
+    function addEvent(){
+      var event = {
+        'summary': 'Google I/O 2015',
+        'location': '800 Howard St., San Francisco, CA 94103',
+        'description': 'A chance to hear more about Google\'s developer products.',
+        'start': {
+          'dateTime': '2015-05-28T09:00:00-07:00',
+          'timeZone': 'America/Los_Angeles'
+        },
+        'end': {
+          'dateTime': '2015-05-28T17:00:00-07:00',
+          'timeZone': 'America/Los_Angeles'
+        },
+        'recurrence': [
+          'RRULE:FREQ=DAILY;COUNT=2'
+        ],
+        'attendees': [
+          {'email': 'lpage@example.com'},
+          {'email': 'sbrin@example.com'}
+        ],
+        'reminders': {
+          'useDefault': false,
+          'overrides': [
+            {'method': 'email', 'minutes': 24 * 60},
+            {'method': 'popup', 'minutes': 10}
+          ]
+        }
+      };
+      
+      var request = gapi.client.calendar.events.insert({
+        'calendarId': 'primary',
+        'resource': event
+      });
+      
+      request.execute(function(event) {
+        appendPre('Event created: ' + event.htmlLink);
+      });
+    }
+    
+    
 
   useEffect(()=>{
     handleClientLoad()
   },[]);
- 
-  const addEvent =() => {
-
-  }
   
   return (
     <div>
       <iframe src="https://calendar.google.com/calendar/embed?src=pkqt33e9pru34l7m52ieg0p6ik%40group.calendar.google.com&ctz=America%2FLos_Angeles"  width="800" height="600" frameborder="0" scrolling="no"></iframe>
-      <Button variant="contained" color="primary" onClick={handleAuthClick}>Calendar Events</Button>
-      <Button variant="contained" color="primary" onClick={listUpcomingEvents}>Calendar Events</Button>
-      {messages.map((x)=><p>{x}</p>)}
+      <Button variant="contained" color="primary" onClick={freeBusy}>freeBusy</Button>
+      <Button variant="contained" color="primary" onClick={getOpenSlots}>Calendar Events</Button>
+      <Button variant="contained" color="primary" onClick={addEvent}>addEvent</Button>
+      {/* {messages.map((x)=><p>{x}</p>)} */}
+      {Object.keys(openSlots).map((x)=>{
+      return (
+      <ul>
+      {x}
+      {openSlots[x].map((y)=>(<li>From: {y.start.toLocaleTimeString()} To:{y.end.toLocaleTimeString()}</li>))}
+      </ul>)
+    })}
     </div>
   );
 }

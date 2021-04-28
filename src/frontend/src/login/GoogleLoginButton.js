@@ -10,6 +10,7 @@ const GoogleSocialAuth = () => {
     const [userVars, setUserVars] = useState({});
     const googleResponse = async (response) => {
       if(user.loggedIn){
+        // console.log(response)
         //The User does not sign out of Google Scope
         console.log("The user has signed out")
         dispatch({type:'signedOut'})

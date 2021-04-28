@@ -159,16 +159,19 @@ EstimateOperations = modelSchema(
 
 class Query(graphene.ObjectType):
     address = graphene.Field(AddressType, addressLine1=graphene.String())
-    addresses = graphene.List(AddressType)
+    addresses = graphene.List(AddressType, uid=graphene.String())
     estimate = graphene.Field(EstimateType, eid=graphene.String())
     estimates = graphene.List(EstimateType)
     job = graphene.Field(JobType, jid=graphene.String())
-    jobs = graphene.List(JobType)
+    jobs = graphene.List(JobType, uid=graphene.String())
 
     def resolve_address(self, info, **kwargs):
         return getNode(Address, kwargs)
 
     def resolve_addresses(self, info, **kwargs):
+        if "uid" in kwargs:
+            usr = User.nodes.get(uid=kwargs["uid"])
+            return usr.address.all()
         return getNodes(Address)
 
     def resolve_estimate(self, info, **kwargs):
@@ -181,7 +184,11 @@ class Query(graphene.ObjectType):
         return getNode(Job, kwargs)
 
     def resolve_jobs(self, info, **kwargs):
-        return getNodes(Job)
+        if "uid" in kwargs:
+            usr = User.nodes.get(uid=kwargs["uid"])
+            return usr.job.all()
+        else:
+            return getNodes(Job)
 
 
 class Mutation(graphene.ObjectType):

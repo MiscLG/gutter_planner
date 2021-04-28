@@ -11,10 +11,13 @@ import './NavigationBar.css'
 import UserPage from "./UserPage";
 import GoogleLogin from "./login/GoogleLoginButton"
 import {AppBar,Tabs,Tab,Typography,withStyles} from '@material-ui/core'
+import {useSelector,useDispatch} from "react-redux";
+
 // import {getClients} from "./API"
 
 
 function NavigationBar(props){
+    const loggedIn = useSelector(state=> state.user.loggedIn)
     const [error, setError] = useState(null);
     useEffect(()=>{
         // Drawer.toggleDrawer("top",true);
@@ -62,7 +65,7 @@ function NavigationBar(props){
                 className="navigation"
                 id = "user"
                 >
-                    <Tab label="User" />
+                   {loggedIn && <Tab label="User" />}
                 </Link>  
             </Tabs>
             

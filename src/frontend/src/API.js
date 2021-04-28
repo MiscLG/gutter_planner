@@ -5,7 +5,8 @@ const address = process.env.REACT_APP_BACKEND_ADDRESS
 const default_queries= {
     // clients: `query clientQuery {clients{ id name}}`,
     users : `query userQuery{users{edges{node{id,username,archived,verified,email,secondaryEmail}}}}`,
-    user:`query getUser($email:String!){ user(email:$email){ uid email username isStaff }}`
+    user:`query getUser($email:String!){ user(email:$email){ uid email username isStaff }}`,
+    user_items: `query addressTest($uid:String) { addresses(uid:$uid){ addressLine1 addressLine2 zipCode jobs{ jid depositPaid dateStarted dateFinished }}}`
 }
 const default_mutations = {
     register :`mutation addUser($email:String!,$username:String!, $password1:String!, $password2:String!){ register( email: $email, password1: $password1, password2: $password2, username: $username,) { success, errors, token, refreshToken } }`,
@@ -103,10 +104,11 @@ let testUser = {username:"test", email:"me@example.com", password1:"HelloWorld$"
 // const getClients = async () =>  await callAPI(default_queries.clients)
 const getUsers = async () => await callAPI(default_queries.users)
 const getUser = async (variables) => await callAPI(default_queries.user,variables)
+const getUserItems = async(variables) => await callAPI(default_queries.user_items,variables)
 const register = async (variables) => await callAPI(default_mutations.register,variables)
 const test_register = async () => await callAPI(default_mutations.register,testUser)
 const social_auth = async (variables) => await callAPI(default_mutations.social_auth,variables)
 const addAddress = async (variables) => await callAPI(default_mutations.add_address,variables)
 const addJob = async (variables) => await callAPI(default_mutations.add_job,variables)
 const addEstimate = async (variables) => await callAPI(default_mutations.add_estimate,variables)
-export {callAPI, register, getUsers, getUser, social_auth,addAddress,addJob,addEstimate}
+export {callAPI, register, getUsers, getUser,getUserItems,social_auth,addAddress,addJob,addEstimate}

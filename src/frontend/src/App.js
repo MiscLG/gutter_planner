@@ -19,7 +19,7 @@ const App = () => {
             { loggedIn ? <UserPage />: <Redirect to="/login"/>}
           </Route>
           <Route path="/estimate">
-            {loggedIn? <Estimate/>: <Redirect to="/login"/>}
+            <Estimate/>
           </Route>
           <Route path="/login">
             {loggedIn? <Redirect to="/"/>:<LoginPage/>}

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useHistory} from "react-router-dom";
 import {useSelector,useDispatch} from "react-redux";
-import {Checkbox,FormControlLabel,InputAdornment, TextField,Select,Typography} from "@material-ui/core";
+import {Button,Checkbox,FormControlLabel,InputAdornment, TextField,Select,Typography} from "@material-ui/core";
 import { handleInput,handleReduxInput } from "./utilities";
 import {addAddress, addJob, addEstimate } from "./API";
 import PlacesAutocompleteBar from "./PlacesAutocompleteBar"
@@ -152,7 +152,14 @@ function Estimate(){
                 />
             }/>
             <p/>
-            <input type="submit" value="Submit"/>
+            <Button
+            type="submit"
+            disabled={!user.loggedIn} 
+            color="primary"
+            variant="contained"
+            >
+                Submit
+            </Button>
         </form>
     )
     
