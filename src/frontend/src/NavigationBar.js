@@ -10,7 +10,7 @@ import {
 import './NavigationBar.css'
 import UserPage from "./UserPage";
 import GoogleLogin from "./login/GoogleLoginButton"
-import {AppBar,Tabs,Tab,Typography,withStyles} from '@material-ui/core'
+import {AppBar,Tabs,Tab,Typography,withStyles,Button} from '@material-ui/core'
 import {useSelector,useDispatch} from "react-redux";
 
 // import {getClients} from "./API"
@@ -40,7 +40,16 @@ function NavigationBar(props){
                 </Link>
                 <div id="logins">
                     <GoogleLogin /> 
-                    <Link to={'/login'}>Login</Link>
+                    
+                    <Link to={'/login'}>
+                        <Button
+                        color="secondary"
+                        variant="contained"
+                        >
+                            {loggedIn? "Logout":"Login"}
+                        </Button>
+                    </Link>
+                    
                 </div>
             </div>
             </AppBar>

@@ -14,6 +14,7 @@ function Estimate(){
     const dispatch = useDispatch()
     const estimateVars = useSelector(state=> state.estimate.estimate)
     let history = useHistory();
+    let cost = useSelector(state=>state.estimate.estimated_value);
 
     const commit = async() => {
         if (estimateData.finished){
@@ -32,10 +33,16 @@ function Estimate(){
     const submitForm= async (event)=> {
         event.preventDefault()
         await dispatch({type:"updateEstimate", payload:estimateVars})
-        commit()
+        await commit()
+        history.push('/user')
+    }   
+    
+    const handleInput = handleReduxInput("updateEstimate",dispatch)
+    const handleEstimateInput = (e)=>{
+        handleInput(e)
+        console.log(cost)
     }
     
-    const handleEstimateInput = handleReduxInput("updateEstimate",dispatch)
 
     const EstimateForm = (
         <form onSubmit={submitForm}>
@@ -170,6 +177,9 @@ function Estimate(){
             <AddressInputForm 
             useAutofill={true}
             />
+            <Typography>
+                Estimated Price: $ {cost>0 ? cost: 'TBD'}
+            </Typography>
             <div>
                  {EstimateForm}
             </div>   

@@ -14,8 +14,18 @@ const initialState = {
         notes:"",
     },
     finished: false,
-    estimated_value: 0.0
+    estimated_value: 0.0,
 
+}
+const checkFinished =(state)=>{
+    return ('addressLine1' in state.address && 'ftGutter'in state.estimate && 'qtyDownspout' in state.estimate)
+}
+const calcCost = (state)=>{
+    if ('ftGutter' in state.estimate && 'qtyDownspout' in state.estimate){
+        return state.estimate.ftGutter*9.0 + state.estimate.qtyDownspout*(state.estimate.numFloors*1.4*80.0)
+    }
+    console.log(state)
+    return 0.0
 }
 
 export default function estimateReducer(state=initialState,action){
@@ -39,24 +49,28 @@ export default function estimateReducer(state=initialState,action){
                 finished:('addressLine1' in state.address && 'ftGutter'in state.estimate && 'qtyDownspout' in state.estimate)
             }
         case 'updateEstimate':
-            return {
+            let val= {
                 ...state,
                 estimate:{
                     ...state.estimate,
                     ...action.payload,
                 },
-                finished:('addressLine1' in state.address && 'ftGutter'in state.estimate && 'qtyDownspout' in state.estimate)
-            }
+                finished:('addressLine1' in state.address && 'ftGutter'in state.estimate && 'qtyDownspout' in state.estimate),
+                // estimated_value:100.0,
+                
+            };
+            val.estimated_value = calcCost(val)
+            return val
         case 'checkFinished':
             return {
                 ...state,
                 finished:('addressLine1' in state.address && 'ftGutter'in state.estimate && 'qtyDownspout' in state.estimate)
             }
-        
         case 'resetEstimate':
             return initialState
         default:
             return state
         
     }
+    
 }

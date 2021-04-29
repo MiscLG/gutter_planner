@@ -28,12 +28,14 @@ const rows = [
 
 function UserPage(){
     const user = useSelector(state=> state.user)
+    const address = useSelector(state=>state.estimate.address.addressLine1)
+    const dispatch = useDispatch()
     const [error, setError] = useState(null);
     const [userQuery, setUQuery] = useState([]);
     const [userItems, setUserItems] = useState({})
     const [jobRows, setJobRows] = useState(rows)
     const [modalOpen,setModalOpen] = useState(false)
-
+    
     const closeModal = () => {
         setModalOpen(false)
     }
@@ -104,8 +106,8 @@ function UserPage(){
     const handleCellClick = (event)=>{
         setModalOpen(true)
         console.log(event)
-        let row = event.row
-
+        dispatch({type:"updateAddress", payload:{addressLine1:event.row.address}})
+        
     }
     
     //calls the api on load
@@ -121,6 +123,7 @@ function UserPage(){
             {history.push("/user")}
             {/* <GoogleCalendarLoader/> */}
             <EventModal
+            address={address}
             open={modalOpen}
             handleClose={closeModal}
             />

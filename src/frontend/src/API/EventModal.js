@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom";
 import {getUser, getUsers,getUserItems} from "../API"
 import GoogleCalendarLoader from "./GoogleCalendarLoader"
 import {useSelector,useDispatch} from "react-redux";
-import {Button,Checkbox,TextField,Select,Typography,Modal,Fade} from "@material-ui/core";
+import {Button,Checkbox,TextField,Select,Typography,Modal,Fade,CssBaseline,Paper} from "@material-ui/core";
 import DateFnsUtils from '@date-io/date-fns';
 import {MuiPickersUtilsProvider,KeyboardDatePicker,KeyboardTimePicker} from '@material-ui/pickers'
 import { DataGrid } from '@material-ui/data-grid';
@@ -17,6 +17,8 @@ const EventModal = (props)=>{
     const [selectedDate, setSelectedDate] = React.useState(new Date(Date.now()))
     const [options, setOptions] = React.useState([])
     const [calLink,setCalLink] = React.useState(null)
+    const address = useSelector(state=>state.estimate.address)
+    // const [address,setAddress] = useState('800 Howard St., San Francisco, CA 94103')
 
     const handleDateChange = async (event) => {
         setSelectedDate(event.target.valueAsDate); 
@@ -26,7 +28,6 @@ const EventModal = (props)=>{
     
     const submitDate = (e)=>{
         e.preventDefault()
-
         let suggestions = []
         // console.log(openSlots)
         for (const [key, value] of Object.entries(openSlots)) {
@@ -46,7 +47,7 @@ const EventModal = (props)=>{
         let end_date = options[e.target.id].end
         var event = {
             'summary': `Estimate:`,
-            'location': `'800 Howard St., San Francisco, CA 94103'`,
+            'location': `${address.addressLine1} ${address.addressLine2}`,
             'description': ``,
             'start': {
                 'dateTime': `${start_date.toISOString()}`,
@@ -76,7 +77,8 @@ const EventModal = (props)=>{
         aria-describedby="simple-modal-description"
         > 
         <Fade in={props.open}>
-            <div style={{backgroundColor:"white"}}>
+            <Paper>
+            {/* <CssBaseline/> */}
             <Typography>We will try to find a time that's close to what you ask.</Typography>
             <form onSubmit={submitDate}>
             <TextField
@@ -112,7 +114,7 @@ const EventModal = (props)=>{
                 onClick={handleEventButton}
                 id={ix}
                 >
-                From: {date.start.toTimeString()}, To: {date.end.toTimeString()}
+                From: {date.start.toLocaleString()}, To: {date.end.toLocaleString()}
                 </Button>
                 )
              )   
@@ -144,7 +146,7 @@ const EventModal = (props)=>{
             }}
             />
             </MuiPickersUtilsProvider> */}
-            </div>
+            </Paper>
         </Fade>
         </Modal>
     )

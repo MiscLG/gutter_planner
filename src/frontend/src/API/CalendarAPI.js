@@ -177,7 +177,8 @@ function addEvent(event){
     });
     
     return request.execute(function(event) {
-    return ('Event created: ' + event.htmlLink);
+        let win = window.open(event.htmlLink, '_blank');
+        win.focus()
     });
 }
 
