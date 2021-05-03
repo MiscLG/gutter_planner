@@ -53,7 +53,7 @@ function Estimate(){
             <FormControlLabel 
             label="Is there ample floor space to place ladders, materials, and any removed metal?"
             labelPlacement="start"
-            control={<Checkbox checked={estimateVars.spaciousGround} name="spaciousGround" onChange={handleEstimateInput}/>}
+            control={<Checkbox color="primary" checked={estimateVars.spaciousGround} name="spaciousGround" onChange={handleEstimateInput}/>}
             />
             <p/>
             <FormControlLabel

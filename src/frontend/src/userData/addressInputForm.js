@@ -50,7 +50,7 @@ function AddressInputForm(props){
                     <FormControlLabel 
                     label="Will we need an access code to enter? "
                     labelPlacement="start"
-                    control={<Checkbox name="isGated" checked={address.isGated} onChange={handleInput} />}
+                    control={<Checkbox color="primary" name="isGated" checked={address.isGated} onChange={handleInput} />}
                     /> 
                     <p/>
                 </div>

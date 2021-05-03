@@ -53,7 +53,7 @@ function Home(){
     return (
         <div >
             {history.push("/")}
-            <h1> Welcome! Get fast online quote with pre-estimate form! </h1>
+            <h1> Welcome! Get a fast online quote with our pre-estimate form! </h1>
             <GridList cellHeight={150}  cols={3} style={{ width: '80vw' }}>
             {tileData.map((tile) => (
                 <GridListTile key={tile.img} cols={tile.cols || 1}>
